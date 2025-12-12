@@ -6,7 +6,7 @@
 /*   By: mnassiri <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/09 21:04:22 by mnassiri          #+#    #+#             */
-/*   Updated: 2025/12/09 21:04:54 by mnassiri         ###   ########.fr       */
+/*   Updated: 2025/12/12 17:29:52 by mnassiri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,5 +17,9 @@
 # include <unistd.h>
 
 int	ft_printf(const char *format, ...);
+int	ft_formats(va_list *args, const char format);
+int	ft_print_char(int c);
+int	ft_print_str(char *str);
+int	ft_print_percent(void);
 
 #endif
