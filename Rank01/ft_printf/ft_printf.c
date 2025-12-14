@@ -6,7 +6,7 @@
 /*   By: mnassiri <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/09 21:04:07 by mnassiri          #+#    #+#             */
-/*   Updated: 2025/12/11 17:49:02 by mnassiri         ###   ########.fr       */
+/*   Updated: 2025/12/14 16:42:33 by mnassiri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,36 +14,87 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void	ft_putchar_fd(char c, int fd)
+int	ft_putchar(char c)
 {
-	write(fd, &c, 1);
+	write(1, &c, 1);
+	return (1);
 }
 
-void	ft_putstr_fd(char *s, int fd)
+int	ft_putstr(char *s)
 {
-	size_t	i;
+	int	i;
+	int	len;
 
 	i = 0;
+	len = 0;
 	while (s[i])
 	{
-		write(fd, &s[i], 1);
+		write(1, &s[i], 1);
 		i++;
+		len++;
 	}
+	return (len);
+}
+
+int	ft_putnbr(int n)
+{
+	int	len;
+
+	len = 0;
+	if (n == -2147483648)
+	{
+		return (ft_putstr("-2147483648"));
+	}
+	if (n < 0)
+	{
+		len += ft_putchar('-');
+		n = -n;
+	}
+	if (n > 9)
+	{
+		len += ft_putnbr(n / 10);
+        	len += ft_putnbr(n % 10);
+	}
+	else
+		len += ft_putchar(n + '0');
+	return (len);
+}
+
+int	typecheck(char type, va_list args)
+{
+	if (type == 'c')
+		return (ft_putchar(va_arg(format, int)));
+	else if (type == 's')
+		return (ft_putstr(va_arg(format, char *)));
+	else if (type == 'd' || type == 'i')
+		return (ft_putnbr(va_arg(format, int));
+	else if (type == 'u')
+		return (ft_putnbr(va_arg(format, unsigned int)));
+	else if	(type == 'p')
+		return (ft_putptr(va_args(format, void *)));
+	else if (type == 'x' || type == 'X')
+		return (ft_puthex());
+	else if (type == '%')
+		return (ft_putchar('%'));
+	return (-1);
 }
 
 int	ft_printf(const char *format, ...)
 {
 	va_list	args;
+	int len = 0;
 	int i;
 
 	va_start(args, format);
 	i = 0;
 	while (format[i])
 	{
-		if (format[i] == '%' && format[i + 1] == 'c')
+		if (format[i] == '%')
 		{
-			ft_putchar_fd(va_arg(args, int), 1);
+			if (format[i + 1] == '\0')
+				return -1;
 			i++;
+			checker_format(format[i], )
 		}
 		else
 			ft_putchar_fd(format[i], 1);
