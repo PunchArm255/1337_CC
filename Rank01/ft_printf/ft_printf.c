@@ -6,7 +6,7 @@
 /*   By: mnassiri <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/09 21:04:07 by mnassiri          #+#    #+#             */
-/*   Updated: 2025/12/14 16:42:33 by mnassiri         ###   ########.fr       */
+/*   Updated: 2025/12/14 17:00:08 by mnassiri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,17 +63,17 @@ int	ft_putnbr(int n)
 int	typecheck(char type, va_list args)
 {
 	if (type == 'c')
-		return (ft_putchar(va_arg(format, int)));
+		return (ft_putchar(va_arg(args, int)));
 	else if (type == 's')
-		return (ft_putstr(va_arg(format, char *)));
+		return (ft_putstr(va_arg(args, char *)));
 	else if (type == 'd' || type == 'i')
-		return (ft_putnbr(va_arg(format, int));
+		return (ft_putnbr(va_arg(args, int)));
 	else if (type == 'u')
-		return (ft_putnbr(va_arg(format, unsigned int)));
-	else if	(type == 'p')
-		return (ft_putptr(va_args(format, void *)));
-	else if (type == 'x' || type == 'X')
-		return (ft_puthex());
+		return (ft_putnbr(va_arg(args, unsigned int)));
+	// else if	(type == 'p')
+	//	return (ft_putptr(va_args(args, void *)));
+	// else if (type == 'x' || type == 'X')
+	//	return (ft_puthex());
 	else if (type == '%')
 		return (ft_putchar('%'));
 	return (-1);
@@ -82,29 +82,32 @@ int	typecheck(char type, va_list args)
 int	ft_printf(const char *format, ...)
 {
 	va_list	args;
-	int len = 0;
+	int len;
 	int i;
 
 	va_start(args, format);
 	i = 0;
+	len = 0;
+	if (!format)
+		return (-1);
 	while (format[i])
 	{
 		if (format[i] == '%')
 		{
 			if (format[i + 1] == '\0')
-				return -1;
+				return (-1);
+			len += typecheck(format[i + 1], args);
 			i++;
-			checker_format(format[i], )
 		}
 		else
-			ft_putchar_fd(format[i], 1);
+			len += ft_putchar(format[i]);
 		i++;
 	}
 	va_end(args);
 	return (0);
 }
 
-int main()
+int main(void)
 {
-	ft_printf("testing printf: %c", 'A');
+	ft_printf("testing printf: %c %s %i %d", 'A', "manal", 22, 55);
 }
