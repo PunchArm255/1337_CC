@@ -6,59 +6,11 @@
 /*   By: mnassiri <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/09 21:04:07 by mnassiri          #+#    #+#             */
-/*   Updated: 2025/12/14 17:00:08 by mnassiri         ###   ########.fr       */
+/*   Updated: 2025/12/15 17:28:25 by mnassiri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
-
-int	ft_putchar(char c)
-{
-	write(1, &c, 1);
-	return (1);
-}
-
-int	ft_putstr(char *s)
-{
-	int	i;
-	int	len;
-
-	i = 0;
-	len = 0;
-	while (s[i])
-	{
-		write(1, &s[i], 1);
-		i++;
-		len++;
-	}
-	return (len);
-}
-
-int	ft_putnbr(int n)
-{
-	int	len;
-
-	len = 0;
-	if (n == -2147483648)
-	{
-		return (ft_putstr("-2147483648"));
-	}
-	if (n < 0)
-	{
-		len += ft_putchar('-');
-		n = -n;
-	}
-	if (n > 9)
-	{
-		len += ft_putnbr(n / 10);
-        	len += ft_putnbr(n % 10);
-	}
-	else
-		len += ft_putchar(n + '0');
-	return (len);
-}
+#include "ft_printf.h"
 
 int	typecheck(char type, va_list args)
 {
@@ -69,11 +21,13 @@ int	typecheck(char type, va_list args)
 	else if (type == 'd' || type == 'i')
 		return (ft_putnbr(va_arg(args, int)));
 	else if (type == 'u')
-		return (ft_putnbr(va_arg(args, unsigned int)));
-	// else if	(type == 'p')
-	//	return (ft_putptr(va_args(args, void *)));
-	// else if (type == 'x' || type == 'X')
-	//	return (ft_puthex());
+		return (ft_putunbr(va_arg(args, unsigned int)));
+	else if (type == 'p')
+		return (ft_putptr(va_arg(args, void *)));
+	else if (type == 'x')
+		return (ft_puthex(va_arg(args, unsigned int), "0123456789abcdef"));
+	else if (type == 'X')
+		return (ft_puthex(va_arg(args, unsigned int), "0123456789ABCDEF"));
 	else if (type == '%')
 		return (ft_putchar('%'));
 	return (-1);
@@ -82,8 +36,8 @@ int	typecheck(char type, va_list args)
 int	ft_printf(const char *format, ...)
 {
 	va_list	args;
-	int len;
-	int i;
+	int		len;
+	int		i;
 
 	va_start(args, format);
 	i = 0;
@@ -104,10 +58,5 @@ int	ft_printf(const char *format, ...)
 		i++;
 	}
 	va_end(args);
-	return (0);
-}
-
-int main(void)
-{
-	ft_printf("testing printf: %c %s %i %d", 'A', "manal", 22, 55);
+	return (len);
 }
