@@ -16,12 +16,12 @@ OBJ = $(SRCS:.c=.o)
 
 all: $(NAME)
 
-$(NAME) : $(OBJ) ft_printf.h
+$(NAME) : $(OBJ)
 	@echo "CREATING LIBRARY..."
 	$(AR) $(NAME) $(OBJ)
 	@echo "DONE!"
 
-%.o: %.c
+%.o: %.c ft_printf.h
 	@$(CC) $(CFLAGS) -c $< -o $@
 
 clean:

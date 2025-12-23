@@ -30,7 +30,7 @@ int	typecheck(char type, va_list args)
 		return (ft_puthex(va_arg(args, unsigned int), "0123456789ABCDEF"));
 	else if (type == '%')
 		return (ft_putchar('%'));
-	return (-1);
+	return (ft_putchar('%') + ft_putchar(type));
 }
 
 int	ft_printf(const char *format, ...)
