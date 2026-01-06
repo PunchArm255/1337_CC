@@ -1,0 +1,3 @@
+# The sha1sum from your Born2BeRoot.vdi goes here:
+
+70c9f88e45befb9944e9f1e3d31779e9f14a58aa
