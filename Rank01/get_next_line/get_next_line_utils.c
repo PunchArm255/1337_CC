@@ -1,12 +1,24 @@
 #include "get_next_line.h"
 
-#include "libft.h"
+size_t	ft_strlen(const char *str)
+{
+	size_t	i;
+
+	if (!str)
+		return (0);
+	i = 0;
+	while (str[i])
+		i++;
+	return (i);
+}
 
 char	*ft_strchr(const char *s, int c)
 {
 	size_t	i;
 	char	*str;
 
+	if (!s)
+		return (0);
 	str = (char *)s;
 	i = 0;
 	while (str[i] && str[i] != (char)c)
@@ -16,26 +28,30 @@ char	*ft_strchr(const char *s, int c)
 	return (NULL);
 }
 
-#include "libft.h"
-
-char	*ft_strjoin(const char *s1, const char *s2)
+char	*ft_strjoin(char *left_str, char *buff)
 {
+	size_t	i;
+	size_t	j;
 	char	*str;
-	int		i;
-	int		j;
 
+	if (!left_str)
+	{
+		left_str = (char *)malloc(1 * sizeof(char));
+		left_str[0] = '\0';
+	}
+	if (!left_str || !buff)
+		return (NULL);
+	str = malloc(sizeof(char) * ((ft_strlen(left_str) + ft_strlen(buff)) + 1));
+	if (str == NULL)
+		return (free(left_str), NULL);
+	i = -1;
 	j = 0;
-	i = 0;
-	if (!s1 || !s2)
-		return (NULL);
-	str = malloc(sizeof(char) * (ft_strlen(s1) + ft_strlen(s2) + 1));
-	if (!str)
-		return (NULL);
-	while (s1[i])
-		str[j++] = s1[i++];
-	i = 0;
-	while (s2[i])
-		str[j++] = s2[i++];
-	str[j] = '\0';
+	if (left_str)
+		while (left_str[++i] != '\0')
+			str[i] = left_str[i];
+	while (buff[j] != '\0')
+		str[i++] = buff[j++];
+	str[i] = '\0';
+	free(left_str);
 	return (str);
 }
