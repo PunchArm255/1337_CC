@@ -100,7 +100,7 @@ char	*get_next_line(int fd)
 	char		*line;
 
 	if (fd < 0 || BUFFER_SIZE <= 0)
-		return (0);
+		return (NULL);
 	stash = read_from_file(fd, stash);
 	if (!stash)
 		return (NULL);

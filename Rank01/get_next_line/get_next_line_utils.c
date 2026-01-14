@@ -54,7 +54,7 @@ char	*ft_strjoin(char *left_str, char *buff)
 	if (!left_str || !buff)
 		return (NULL);
 	str = malloc(sizeof(char) * ((ft_strlen(left_str) + ft_strlen(buff)) + 1));
-	if (str == NULL)
+	if (!str)
 		return (free(left_str), NULL);
 	i = -1;
 	j = 0;
