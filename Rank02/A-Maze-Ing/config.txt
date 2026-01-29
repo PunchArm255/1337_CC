@@ -1,7 +1,10 @@
-ADNAN=12
-HEIGHT=-3
-WIDTH=
+WIDTH=20
+HEIGHT=20
 ENTRY=0,0
-EXIT=19,14
-OUTPUT_FILE=maze.txt
-PERFECT=True
+EXIT=19,19
+OUTPUT_FILE=output.txt
+PERFECT=yes
+
+# misc keys
+VISUAL=maze_visual
+ajdjasjdas=('yahya', 0, 10)
