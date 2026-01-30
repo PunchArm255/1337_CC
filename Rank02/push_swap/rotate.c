@@ -12,10 +12,6 @@
 
 #include "push_swap.h"
 
-/*
-** rotate:
-** The first element becomes the last one.
-*/
 static void	rotate(t_stack **stack)
 {
 	t_stack	*tmp;

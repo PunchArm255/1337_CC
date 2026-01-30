@@ -6,7 +6,7 @@
 /*   By: mnassiri <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/29 23:14:08 by mnassiri          #+#    #+#             */
-/*   Updated: 2026/01/29 23:14:10 by mnassiri         ###   ########.fr       */
+/*   Updated: 2026/01/30 15:03:50 by mnassiri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,9 +21,12 @@ int	is_valid_number(char *str)
 {
 	int	i;
 	int	has_digit;
-
-	if (!str || !str[0])
+	perror("1");
+	if (str == NULL || str[0] == '\0')
+	{
+		perror("");
 		return (0);
+	}
 	i = 0;
 	has_digit = 0;
 	if (is_sign(str[i]))
@@ -60,5 +63,15 @@ void	fill_stack(t_stack **a, char **args, int i, int argc)
 		new = stack_new((int)nbr);
 		stack_add_back(a, new);
 		i++;
+	}
+}
+
+void	leak_check(int argc, char **args)
+{
+	if (!args || !args[0])
+	{
+		if (argc == 2 && args)
+			free_split(args);
+		return ;
 	}
 }

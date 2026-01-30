@@ -12,10 +12,6 @@
 
 #include "push_swap.h"
 
-/*
-** push:
-** Takes the top node from src and puts it at the top of dest.
-*/
 static void	push(t_stack **dest, t_stack **src)
 {
 	t_stack	*tmp;

@@ -12,11 +12,6 @@
 
 #include "push_swap.h"
 
-/*
-** swap:
-** Swaps the top two elements of the stack.
-** Does nothing if there are less than 2 elements.
-*/
 static void	swap(t_stack **head)
 {
 	t_stack	*tmp;

@@ -12,11 +12,6 @@
 
 #include "push_swap.h"
 
-/*
-** get_max_bits:
-** Returns the number of bits needed to represent the largest index.
-** Example: If max index is 3 (binary 11), we need 2 bits.
-*/
 static int	get_max_bits(t_stack **stack)
 {
 	t_stack	*head;
@@ -37,10 +32,6 @@ static int	get_max_bits(t_stack **stack)
 	return (max_bits);
 }
 
-/*
-** radix_sort:
-** Sorts the stack using bitwise operations.
-*/
 void	radix_sort(t_stack **stack_a, t_stack **stack_b)
 {
 	t_stack	*head_a;

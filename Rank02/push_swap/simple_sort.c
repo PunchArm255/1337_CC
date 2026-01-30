@@ -12,10 +12,6 @@
 
 #include "push_swap.h"
 
-/*
-** get_min:
-** Finds the node with the minimum index.
-*/
 static int	get_min(t_stack **stack, int val)
 {
 	t_stack	*head;
@@ -32,11 +28,6 @@ static int	get_min(t_stack **stack, int val)
 	return (min);
 }
 
-/*
-** sort_3:
-** Hardcoded logic to sort 3 numbers in <= 2 moves.
-** Assumes stack indices are 0, 1, 2 (or relative rank).
-*/
 static void	sort_3_part2(t_stack **stack_a, int min, int next_min)
 {
 	t_stack	*head;
@@ -82,10 +73,6 @@ void	sort_3(t_stack **stack_a)
 	sort_3_part2(stack_a, min, next_min);
 }
 
-/*
-** sort_4_5:
-** Moves the smallest numbers to B, calls sort_3, then pushes them back.
-*/
 void	sort_5(t_stack **stack_a, t_stack **stack_b)
 {
 	int	size;
@@ -105,10 +92,6 @@ void	sort_5(t_stack **stack_a, t_stack **stack_b)
 		sa(stack_a, 1);
 }
 
-/*
-** simple_sort:
-** Router for small lists.
-*/
 void	simple_sort(t_stack **stack_a, t_stack **stack_b)
 {
 	int	size;

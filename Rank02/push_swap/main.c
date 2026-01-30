@@ -57,18 +57,20 @@ static void	init_stack(t_stack **a, int argc, char **argv)
 	i = 0;
 	args = NULL;
 	if (argc == 2)
-		args = ft_split(argv[1], ' ');
+	{
+		if (!argv[1] || argv[1][0] == '\0')
+			ft_error();
+		else
+			args = ft_split(argv[1], ' ');
+
+	}
+	
 	else
 	{
 		i = 1;
 		args = argv;
 	}
-	if (!args || !args[0])
-	{
-		if (argc == 2 && args)
-			free_split(args);
-		return ;
-	}
+	leak_check(argc, args);
 	fill_stack(a, args, i, argc);
 	if (argc == 2)
 		free_split(args);
@@ -96,6 +98,7 @@ int	main(int argc, char **argv)
 	if (argc < 2)
 		return (0);
 	init_stack(&stack_a, argc, argv);
+	perror("");
 	if (!stack_a)
 		return (0);
 	index_stack(stack_a);
