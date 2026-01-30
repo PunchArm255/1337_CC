@@ -51,9 +51,7 @@ static void	check_duplicates(t_stack *stack)
 
 static void	init_stack(t_stack **a, int argc, char **argv)
 {
-	t_stack	*new;
 	char	**args;
-	long	nbr;
 	int		i;
 
 	i = 0;
@@ -71,25 +69,7 @@ static void	init_stack(t_stack **a, int argc, char **argv)
 			free_split(args);
 		return ;
 	}
-	while (args[i])
-	{
-		if (!is_valid_number(args[i]))
-		{
-			if (argc == 2)
-				free_split(args);
-			ft_error();
-		}
-		nbr = ft_atoi(args[i]);
-		if (nbr > INT_MAX || nbr < INT_MIN)
-		{
-			if (argc == 2)
-				free_split(args);
-			ft_error();
-		}
-		new = stack_new((int)nbr);
-		stack_add_back(a, new);
-		i++;
-	}
+	fill_stack(a, args, i, argc);
 	if (argc == 2)
 		free_split(args);
 	check_duplicates(*a);
@@ -111,10 +91,10 @@ int	main(int argc, char **argv)
 	t_stack	*stack_a;
 	t_stack	*stack_b;
 
-	if (argc < 2)
-		return (0);
 	stack_a = NULL;
 	stack_b = NULL;
+	if (argc < 2)
+		return (0);
 	init_stack(&stack_a, argc, argv);
 	if (!stack_a)
 		return (0);

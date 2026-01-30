@@ -37,3 +37,28 @@ int	is_valid_number(char *str)
 	}
 	return (has_digit);
 }
+
+void	exit_error(char **args, int argc)
+{
+	if (argc == 2)
+		free_split(args);
+	ft_error();
+}
+
+void	fill_stack(t_stack **a, char **args, int i, int argc)
+{
+	t_stack	*new;
+	long	nbr;
+
+	while (args[i])
+	{
+		if (!is_valid_number(args[i]))
+			exit_error(args, argc);
+		nbr = ft_atoi(args[i]);
+		if (nbr > INT_MAX || nbr < INT_MIN)
+			exit_error(args, argc);
+		new = stack_new((int)nbr);
+		stack_add_back(a, new);
+		i++;
+	}
+}

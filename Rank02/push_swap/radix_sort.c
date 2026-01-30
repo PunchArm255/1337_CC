@@ -59,15 +59,11 @@ void	radix_sort(t_stack **stack_a, t_stack **stack_b)
 		while (j++ < size)
 		{
 			head_a = *stack_a;
-			// Check if the bit at position 'i' is 1.
-			// (head_a->index >> i) shifts the index right by i bits.
-			// & 1 isolates the last bit.
 			if (((head_a->index >> i) & 1) == 1)
 				ra(stack_a, 1);
 			else
 				pb(stack_a, stack_b, 1);
 		}
-		// Push everything back to A
 		while (stack_size(*stack_b) != 0)
 			pa(stack_a, stack_b, 1);
 		i++;

@@ -47,6 +47,8 @@ void	radix_sort(t_stack **stack_a, t_stack **stack_b);
 // misc_shit
 void	check_args(int argc, char **argv);
 int		is_valid_number(char *str);
+void	exit_error(char **args, int argc);
+void	fill_stack(t_stack **a, char **args, int i, int argc);
 
 // operationz
 void	sa(t_stack **a, int print);

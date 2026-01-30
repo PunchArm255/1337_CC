@@ -33,7 +33,6 @@ Run the program with a list of integers as arguments. It will output the list of
 # pb
 # pb
 # ...
-
 ```
 
 You can also run it with a single string argument:
@@ -70,13 +69,13 @@ While algorithms like **Turk** or **Chunks** seem to be the most efficient to fu
 
 ### The Algorithm Steps:
 
-1. **Step 1: Indexing**
+**Step 1: Indexing**
 
 * Radix sort relies on bitwise operations, which work best on a continuous range of positive integers.
 * I assign a "Rank" (index) to every number in the stack based on its value. The smallest number gets `index 0`, the next `index 1`, and so on.
 * This simplifies the problem: no matter if the input is `{-1000, 2, 50}` or `{0, 1, 2}`, the algorithm treats them exactly the same.
 
-2. **Step 2: Bitwise Radix Sort**
+**Step 2: Bitwise Radix Sort**
 
 * I sort the numbers by processing their binary representation bit by bit, from the Least Significant Bit (LSB) to the Most Significant Bit (MSB).
 * **The Loop:** For each bit position `i`:
@@ -88,7 +87,7 @@ While algorithms like **Turk** or **Chunks** seem to be the most efficient to fu
 * After checking all numbers, I push everything back from B to A (`pa`).
 * This process repeats until the most significant bit is processed.
 
-3. **Step 3: Tiny Sorts (Hardcoded)**
+**Step 3: Tiny Sorts (Hardcoded)**
 
 * Radix sort is overkill for very small lists (3-5 numbers).
 * For these cases, I hardcoded a simple logic (finding the min/max and rotating) to ensure I pass the strict "maximum 12 operations" limit for 5 numbers.

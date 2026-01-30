@@ -22,12 +22,12 @@ static int	get_min(t_stack **stack, int val)
 	int		min;
 
 	head = *stack;
-	min = head->index;
-	while (head->next)
+	min = -1;
+	while (head)
 	{
-		head = head->next;
-		if ((head->index < min) && head->index != val)
+		if (head->index != val && (min == -1 || head->index < min))
 			min = head->index;
+		head = head->next;
 	}
 	return (min);
 }
@@ -37,22 +37,12 @@ static int	get_min(t_stack **stack, int val)
 ** Hardcoded logic to sort 3 numbers in <= 2 moves.
 ** Assumes stack indices are 0, 1, 2 (or relative rank).
 */
-void	sort_3(t_stack **stack_a)
+static void	sort_3_part2(t_stack **stack_a, int min, int next_min)
 {
 	t_stack	*head;
-	int		min;
-	int		next_min;
 
 	head = *stack_a;
-	min = get_min(stack_a, -1);
-	next_min = get_min(stack_a, min);
-	if (head->index == min && head->next->index != next_min)
-	{
-		ra(stack_a, 1);
-		sa(stack_a, 1);
-		rra(stack_a, 1);
-	}
-	else if (head->index == next_min)
+	if (head->index == next_min)
 	{
 		if (head->next->index == min)
 			sa(stack_a, 1);
@@ -69,6 +59,27 @@ void	sort_3(t_stack **stack_a)
 			rra(stack_a, 1);
 		}
 	}
+}
+
+void	sort_3(t_stack **stack_a)
+{
+	t_stack	*head;
+	int		min;
+	int		next_min;
+
+	head = *stack_a;
+	min = get_min(stack_a, -1);
+	next_min = get_min(stack_a, min);
+	if (head->index == min && head->next->index == next_min)
+		return ;
+	if (head->index == min)
+	{
+		ra(stack_a, 1);
+		sa(stack_a, 1);
+		rra(stack_a, 1);
+		return ;
+	}
+	sort_3_part2(stack_a, min, next_min);
 }
 
 /*
