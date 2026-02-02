@@ -62,9 +62,7 @@ static void	init_stack(t_stack **a, int argc, char **argv)
 			ft_error();
 		else
 			args = ft_split(argv[1], ' ');
-
 	}
-	
 	else
 	{
 		i = 1;
@@ -98,7 +96,6 @@ int	main(int argc, char **argv)
 	if (argc < 2)
 		return (0);
 	init_stack(&stack_a, argc, argv);
-	perror("");
 	if (!stack_a)
 		return (0);
 	index_stack(stack_a);

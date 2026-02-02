@@ -21,12 +21,9 @@ int	is_valid_number(char *str)
 {
 	int	i;
 	int	has_digit;
-	perror("1");
-	if (str == NULL || str[0] == '\0')
-	{
-		perror("");
+
+	if (!str || !str[0])
 		return (0);
-	}
 	i = 0;
 	has_digit = 0;
 	if (is_sign(str[i]))
@@ -72,6 +69,6 @@ void	leak_check(int argc, char **args)
 	{
 		if (argc == 2 && args)
 			free_split(args);
-		return ;
+		ft_error();
 	}
 }
