@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Tuple
 import sys
 import os
 
@@ -15,7 +15,7 @@ def first_args_validation() -> Dict[str, str]:
         Exit the program if errors
     """
     config_variables: List[str] = []
-    valid_configs: List[tuple] = []
+    valid_configs: List[Tuple[str, str]] = []
     errors: List[str] = []
 
     if len(sys.argv) < 2:
@@ -100,14 +100,16 @@ def semantic_validation(config_values: Dict[str, str]) -> Dict[str, Any]:
         Typed config dict with proper types
     """
     updated_config_values: Dict[str, Any] = config_values
-    typed_configs: Dict = {}
+    typed_configs: Dict[str, Any] = {}
     errors: List[str] = []
 
     # ============================================================
     # Check for all the mandatory keys
     required_keys: List[str] = ["WIDTH", "HEIGHT", "ENTRY",
                                 "EXIT", "OUTPUT_FILE", "PERFECT"]
-    missing_keys: List = [k for k in required_keys if k not in config_values]
+    missing_keys: List[str] = [
+        k for k in required_keys if k not in config_values
+    ]
 
     if missing_keys:
         print("Semantic error found:")
@@ -162,17 +164,17 @@ def semantic_validation(config_values: Dict[str, str]) -> Dict[str, Any]:
         successful_entry_parsing = False
         # Checking for the ENTRY coordinates
         try:
-            y = int(splitted_entry[0])
-            x = int(splitted_entry[1])
+            x = int(splitted_entry[0])
+            y = int(splitted_entry[1])
             if x < 0 or y < 0:
                 errors.append("ENTRY coordinates cannot be negative")
-            elif y >= width or x >= height:
-                if y >= width:
+            elif x >= width or y >= height:
+                if x >= width:
                     errors.append(f"In 'ENTRY' coordinates line: "
-                                  f"{y} value is out of WIDTH bounds")
+                                  f"{x} value is out of WIDTH bounds")
                 else:
                     errors.append(f"In 'ENTRY' coordinates line: "
-                                  f"{x} value is out of HEIGHT bounds")
+                                  f"{y} value is out of HEIGHT bounds")
             else:
                 typed_configs["ENTRY"] = (y, x)
                 del updated_config_values["ENTRY"]
@@ -182,26 +184,27 @@ def semantic_validation(config_values: Dict[str, str]) -> Dict[str, Any]:
 
         # After parsing coordinates, check if it's at the border:
         if successful_entry_parsing:
-            if not is_at_border(typed_configs["ENTRY"][1],
-                                typed_configs["ENTRY"][0],
-                                typed_configs["WIDTH"],
-                                typed_configs["HEIGHT"]):
-                errors.append("ENTRY must be at external border of the maze")
+            if is_at_border(typed_configs["ENTRY"][1],
+                            typed_configs["ENTRY"][0],
+                            typed_configs["WIDTH"],
+                            typed_configs["HEIGHT"]):
+                errors.append("ENTRY must be inside the WIDTH "
+                              "and HEIGHT bounds")
 
         # Checking for the EXIT coordinates
         successful_exit_parsing = False
         try:
-            y = int(splitted_exit[0])
-            x = int(splitted_exit[1])
+            x = int(splitted_exit[0])
+            y = int(splitted_exit[1])
             if x < 0 or y < 0:
                 errors.append("EXIT coordinates cannot be negative")
-            elif y >= width or x >= height:
-                if y >= width:
+            elif x >= width or y >= height:
+                if x >= width:
                     errors.append(f"In 'EXIT' coordinates line: "
-                                  f"{y} value is out of WIDTH bounds")
+                                  f"{x} value is out of WIDTH bounds")
                 else:
                     errors.append(f"In 'EXIT' coordinates line: "
-                                  f"{x} value is out of HEIGHT bounds")
+                                  f"{y} value is out of HEIGHT bounds")
             else:
                 typed_configs["EXIT"] = (y, x)
                 del updated_config_values["EXIT"]
@@ -211,11 +214,12 @@ def semantic_validation(config_values: Dict[str, str]) -> Dict[str, Any]:
 
         # After parsing coordinates, check if it's at the border:
         if successful_exit_parsing:
-            if not is_at_border(typed_configs["EXIT"][1],
-                                typed_configs["EXIT"][0],
-                                typed_configs["WIDTH"],
-                                typed_configs["HEIGHT"]):
-                errors.append("EXIT must be at external border of the maze")
+            if is_at_border(typed_configs["EXIT"][1],
+                            typed_configs["EXIT"][0],
+                            typed_configs["WIDTH"],
+                            typed_configs["HEIGHT"]):
+                errors.append("EXIT must be inside the WIDTH "
+                              "and HEIGHT bounds")
 
     # check if there's any errors and exit
     if errors:
@@ -235,8 +239,8 @@ def semantic_validation(config_values: Dict[str, str]) -> Dict[str, Any]:
         del updated_config_values["PERFECT"]
     else:
         errors.append("In 'PERFECT' configuration line: "
-                      f"'{config_values['PERFECT']}' is not a valid "
-                      "parsable boolean value. Please use 'True/False', "
+                      f"'{config_values["PERFECT"]}' is not a valid "
+                      "parsable boolean value. Please use 'True/False',"
                       "'1/0' or 'Yes/No'")
 
     if errors:
@@ -304,10 +308,20 @@ def semantic_validation(config_values: Dict[str, str]) -> Dict[str, Any]:
         typed_configs["VISUAL"] = config_values["VISUAL"]
         del updated_config_values["VISUAL"]
 
-    # ALGORITHM (optional, string)
+    # ALGORITHM (optional, string for pathfinding)
     if "ALGORITHM" in config_values:
         typed_configs["ALGORITHM"] = config_values["ALGORITHM"]
         del updated_config_values["ALGORITHM"]
+
+    # GEN_ALGORITHM (optional, string for maze generation)
+    if "GEN_ALGORITHM" in config_values:
+        gen_algo = config_values["GEN_ALGORITHM"].lower()
+        if gen_algo in ["hunt_and_kill", "recursive_backtracker"]:
+            typed_configs["GEN_ALGORITHM"] = gen_algo
+        else:
+            errors.append(f"Invalid GEN_ALGORITHM: '{gen_algo}'. "
+                          "Must be 'hunt_and_kill' or 'recursive_backtracker'")
+        del updated_config_values["GEN_ALGORITHM"]
 
     # DISPLAY MODE (optional, string)
     if "DISPLAY MODE" in config_values:
