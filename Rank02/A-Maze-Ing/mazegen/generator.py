@@ -45,7 +45,7 @@ class MazeGenerator:
             print("Cannot place '42' pattern: Maze too small")
 
         # Generate using selected algorithm
-        if algorithm == "recursive_backtracker":
+        if algorithm.lower() == "recursive_backtracker":
             self._generate_recursive_backtracker()
         else:
             self._generate_hunt_and_kill()
@@ -53,7 +53,10 @@ class MazeGenerator:
         return self.maze
 
     def _get_valid_start(self) -> Tuple[int, int]:
-        """Get a starting cell that's not on the 42 pattern."""
+        """Get a starting cell that's not on the 42 pattern.
+        Return:
+            Coodrinate (y, x) of the valid start
+        """
         curr_y = random.randint(0, self.height - 1)
         curr_x = random.randint(0, self.width - 1)
 
@@ -88,9 +91,11 @@ class MazeGenerator:
             if valid_neighbors:
                 next_cell = random.choice(valid_neighbors)
                 next_y, next_x = next_cell
+                # remove wall between current and next coordinates
                 self.maze.remove_wall_between(curr_y, curr_x, next_y, next_x)
-
+                # mark next as visited
                 self.maze.mark_visited(next_y, next_x)
+                # update the current
                 curr_y, curr_x = next_y, next_x
             else:
                 # Hunt phase
