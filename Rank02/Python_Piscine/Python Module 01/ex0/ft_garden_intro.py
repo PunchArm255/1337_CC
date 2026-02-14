@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
-def main():
+
+def main() -> None:
+    """Display basic plant information."""
     name = "Rose"
     height = 23
     age = 30
@@ -9,7 +11,7 @@ def main():
     print(f"Plant: {name}")
     print(f"Height: {height}cm")
     print(f"Age: {age} days")
-    print("\n=== End of Progress ===")
+    print("\n=== End of Program ===")
 
 
 if __name__ == "__main__":

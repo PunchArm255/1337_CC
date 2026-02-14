@@ -1,16 +1,22 @@
 #!/usr/bin/env python3
 
+
 class Plant:
-    def __init__(self, name: str, height: int, age_: int):
+    """Represent a plant created by the factory."""
+
+    def __init__(self, name: str, height: int, age_: int) -> None:
+        """Initialize a plant with name, height and age."""
         self.name = name
         self.height = height
         self.age_ = age_
 
-    def get_info(self):
+    def get_info(self) -> None:
+        """Print the plant's creation details."""
         print(f"Created: {self.name} ({self.height}cm, {self.age_} days)")
 
 
-def main():
+def main() -> None:
+    """Create multiple plants and display the factory output."""
     plants = []
     plants.append(Plant("Rose", 25, 30))
     plants.append(Plant("Sunflower", 80, 45))
