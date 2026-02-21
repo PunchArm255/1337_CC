@@ -2,25 +2,18 @@
 
 import sys
 
-
 def main():
-
     print("=== Command Quest ===")
-
-    if len(sys.argv) == 1:
+    
+    if len(sys.argv) < 2:
         print("No arguments provided!")
-
-    print(f"Program name: {sys.argv[0]}")
-
-    if len(sys.argv) > 1:
-        print(f"Arguments received: {len(sys.argv) - 1}")
-        nb = 1
+    else:
+        print(f"Arguments received: {len(sys.argv[1:])}")
+        x = 1
         for arg in sys.argv[1:]:
-            print(f"Argument {nb}: {arg}")
-            nb += 1
-
-    print(f"Total Arguments: {len(sys.argv)}\n")
-
+            print(f"Argument {x}: {arg}")
+            x += 1
+    print(f"Total arguments: {len(sys.argv)}")
 
 if __name__ == "__main__":
     main()

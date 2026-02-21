@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 
 import sys
-import math
 
 
 def display_stats(x, y, z):
     """Handles the common math and printing logic."""
     coords = (x, y, z)
-    distance = math.sqrt(x**2 + y**2 + z**2)
+    distance = math.sqrt(x ** 2 + y ** 2 + z ** 2)
 
     print(f"Position created: {coords}")
     print(f"Distance between (0, 0, 0) and {coords}: {distance:.2f}\n")
@@ -20,8 +19,8 @@ def main():
     print("=== Game Coordinate System ===\n")
 
     if len(sys.argv) == 1:
-        print("No scores provided. Usage: python3 ft_coordinate_system.py "
-              "<score1> <score2> ...")
+        print("No coordinates provided. Usage: python3 ft_coordinate_system.py"
+              " <score1> <score2> ...")
         return
 
     if len(sys.argv) == 2:
