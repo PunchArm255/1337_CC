@@ -1,14 +1,18 @@
 #!/usr/bin/env python3
+"""Score Cruncher: analyze player scores using lists."""
 
 import sys
-import math
 
 
-def main():
+def main() -> None:
+    """Read scores from argv and display statistics."""
     print("=== Player Score Analytics ===")
-    
+
     if len(sys.argv) < 2:
-        print("No scores provided. Usage: python3 ft_score_analytics.py <score1> <score2> ...")
+        print(
+            "No scores provided. Usage: python3 ft_score_analytics.py <score1>"
+            " <score2> ..."
+        )
     else:
         try:
             scores = [int(sc) for sc in sys.argv[1:]]

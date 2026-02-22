@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
+"""Position Tracker: 3D coordinate system using tuples."""
 
 import sys
+import math
 
 
-def display_stats(x, y, z):
-    """Handles the common math and printing logic."""
+def display_stats(x: int, y: int, z: int) -> None:
+    """Compute and print distance and unpacking for a 3D point."""
     coords = (x, y, z)
-    distance = math.sqrt(x ** 2 + y ** 2 + z ** 2)
+    distance = math.sqrt(x**2 + y**2 + z**2)
 
     print(f"Position created: {coords}")
     print(f"Distance between (0, 0, 0) and {coords}: {distance:.2f}\n")
@@ -15,28 +17,31 @@ def display_stats(x, y, z):
     print(f"Coordinates at: X={x}, Y={y}, Z={z}")
 
 
-def main():
+def main() -> None:
+    """Parse coordinate arguments and display results."""
     print("=== Game Coordinate System ===\n")
 
     if len(sys.argv) == 1:
-        print("No coordinates provided. Usage: python3 ft_coordinate_system.py"
-              " <score1> <score2> ...")
+        print(
+            "No coordinates provided. Usage: python3 ft_coordinate_system.py"
+            " <score1> <score2> ..."
+        )
         return
 
     if len(sys.argv) == 2:
         try:
-            values = sys.argv[1].split(',')
+            values = sys.argv[1].split(",")
             if len(values) != 3:
                 print("Error: You must input 3 coordinates (x, y, z)")
                 return
             x, y, z = [int(v) for v in values]
-            print(f"Parsing coordinates: \"{sys.argv[1]}\"")
+            print(f'Parsing coordinates: "{sys.argv[1]}"')
             display_stats(x, y, z)
 
         except ValueError as e:
-            print(f"Parsing invalid coordinates: \"{sys.argv[1]}\"")
+            print(f'Parsing invalid coordinates: "{sys.argv[1]}"')
             print(f"Error parsing coordinates: {e}")
-            print(f"Error details - Type: ValueError, Args: (\"{e}\")")
+            print(f'Error details - Type: ValueError, Args: ("{e}")')
 
     elif len(sys.argv) == 4:
         try:
@@ -45,7 +50,7 @@ def main():
 
         except ValueError as e:
             print(f"Error initializing coordinates: {e}")
-            print(f"Error details - Type: ValueError, Args: (\"{e}\")")
+            print(f'Error details - Type: ValueError, Args: ("{e}")')
 
     else:
         print("Error: You must input 3 coordinates (x, y, z)")
