@@ -52,11 +52,8 @@ def main() -> None:
         print(f"Scarce: {scarce}")
 
         print("\n=== Management Suggestions ===")
-        restock = []
-        for k, v in inv.items():
-            if v < 2:
-                restock.append(k)
-        print(f"Restock needed: {", ".join(restock)}")
+        restock = [k for k, v in inv.items() if v < 2]
+        print(f"Restock needed: {', '.join(restock)}")
 
         print("\n=== Dictionary Properties Demo ===")
         print(f"Dictionary keys: {', '.join(inv.keys())}")
