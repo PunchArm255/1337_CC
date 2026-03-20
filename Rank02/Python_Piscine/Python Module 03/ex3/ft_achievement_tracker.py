@@ -16,8 +16,8 @@ def main() -> None:
         "perfectionist",
     }
 
-    all_union = alice.union(bob).union(charlie)
-    all_inter = alice.intersection(bob).intersection(charlie)
+    all_union = alice | bob | charlie
+    all_inter = alice & bob & charlie
     all_rare = (
         (alice - bob - charlie)
         | (bob - charlie - alice)

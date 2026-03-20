@@ -12,6 +12,7 @@ from helpers.visualizer import run_visualizer
 def main() -> None:
     """Main Program orchestrator"""
     # 1. Parse config
+    sys.setrecursionlimit(1000000)
     configs = first_args_validation()
     typed_configs = semantic_validation(configs)
 

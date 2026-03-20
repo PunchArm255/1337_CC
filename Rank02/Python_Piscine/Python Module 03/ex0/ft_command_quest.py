@@ -15,8 +15,8 @@ def main() -> None:
         print(f"Program name: {sys.argv[0]}")
         print(f"Arguments received: {len(sys.argv[1:])}")
         x = 1
-        for arg in sys.argv[1:]:
-            print(f"Argument {x}: {arg}")
+        for a in sys.argv[1:]:
+            print(f"Argument {x}: {a}")
             x += 1
     print(f"Total arguments: {len(sys.argv)}")
 

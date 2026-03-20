@@ -3,14 +3,15 @@
 import sys
 
 
-def main():
+def main() -> None:
     print("=== CYBER ARCHIVES - COMMUNICATION SYSTEM ===\n")
 
-    print("Input Stream active. Enter archivist ID: ARCH_7742")
-    print("Input Stream active. Enter status report: All systems nominal\n")
+    id = input("Input Stream active. Enter archivist ID: ")
+    status = input("Input Stream active. Enter status report: ")
 
-    sys.stdout.write("[STANDARD] Archive status from ARCH_7742: All systems nominal\n")
-    sys.stderr.write("[ALERT] System diagnostic: Communication channels verified\n")
+    sys.stdout.write(f"\n[STANDARD] Archive status from {id}: {status}\n")
+    sys.stderr.write("[ALERT] System diagnostic: "
+                     "Communication channels verified\n")
     sys.stdout.write("[STANDARD] Data transmission complete\n")
 
     print("\nThree-channel communication test successful.")

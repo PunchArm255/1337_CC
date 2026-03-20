@@ -1,23 +1,26 @@
 #!/usr/bin/env python3
 
 
-def main():
+def main() -> None:
     print("=== CYBER ARCHIVES - VAULT SECURITY SYSTEM ===\n")
 
     print("Initiating secure vault access...")
-    print("Vault connection established with failsafe protocols\n")
+    print("Vault connection established with failsafe protocols")
 
-    with open("classified_data.txt", "r") as file1:
-        content = file1.read()
-        print("SECURE EXTRACTION:")
-        print(content)
+    try:
+        with open("classified_data.txt", "r") as f:
+            data = f.read()
+            print("\nSECURE EXTRACTION:")
+            print(data)
+    except FileNotFoundError:
+        print("\nEXTRACTION ERROR:")
+        print("Secure vault not found.")
 
-    with open("security_protocols.txt", "w+") as file2:
-        print("\nSECURE PRESERVATION:")
-        file2.write("[CLASSIFIED] Brand New security protocols archived")
-        file2.seek(0)
-        content = file2.read()
-        print(content)
+    print("\nSECURE PRESERVATION:")
+    with open("security_protocols.txt", "w") as f:
+        proto = "[CLASSIFIED] New security protocols archived"
+        f.write(proto)
+        print(proto)
         print("Vault automatically sealed upon completion")
 
     print("\nAll vault operations completed with maximum security.")

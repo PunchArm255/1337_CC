@@ -277,7 +277,7 @@ def main() -> None:
     print("=== Game Analytics Dashboard ===\n")
 
     print("=== List Comprehension Examples ===")
-    hi_scorers = list({x["player"] for x in sessions if x["score"] > 2000})
+    hi_scorers = [{x["player"] for x in sessions if x["score"] > 2000}]
     doubled = [x["total_score"] * 2 for x in players.values()]
     active = [
         name for name, stat in players.items() if stat["sessions_played"] > 20

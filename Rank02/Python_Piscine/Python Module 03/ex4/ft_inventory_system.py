@@ -6,7 +6,7 @@ import sys
 
 def main() -> None:
     """Parse item:quantity args and display inventory analytics."""
-    print("=== Inventory System Analysis ===\n")
+    print("=== Inventory System Analysis ===")
 
     if len(sys.argv) > 1:
         inv = {}
