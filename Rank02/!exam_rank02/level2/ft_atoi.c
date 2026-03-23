@@ -18,18 +18,17 @@ int	ft_atoi(const char *str)
         i++;
     }
 
-    while (str[i])
+    while (str[i] >= '0' || str[i] <= '9')
     {
-        res *= 10;
-        res += str[i] - '0';
+        res = (res * 10) + (str[i] - '0');
         i++;
     }
 
     return res * sign;
 }
 
-int main()
-{
-    int a = ft_atoi("1337");
-    printf("%d", a);
-}
+// int main()
+// {
+//     int a = ft_atoi("1337");
+//     printf("%d", a);
+// }

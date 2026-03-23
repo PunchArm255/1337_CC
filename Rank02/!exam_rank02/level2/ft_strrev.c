@@ -24,6 +24,7 @@ char    *ft_strrev(char *str)
     return str;
 }
 
+
 int main()
 {
     char *str = "hello";
