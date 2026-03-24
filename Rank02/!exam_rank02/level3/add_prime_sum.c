@@ -11,43 +11,21 @@ int ft_atoi(char *str)
 {
     int i = 0;
     int res = 0;
-    int sign = 1;
 
     while (str[i] <= 32)
         i++;
     
-    while (str[i] == '+' || str[i] == '-')
-    {
-        if (str[i] == '-')
-            sign *= -1;
-        i++;
-    }
-
     while (str[i])
     {
-        res *= 10;
-        res += str[i] - '0'; 
+        res = (res * 10) + (str[i] - '0');
         i++;
     }
 
-    return (res * sign);
+    return (res);
 }
 
 void ft_putnbr(int nb)
 {
-    if (nb == -2147483648)
-    {
-        write (1, "-2147483648", 11);
-        return;
-    }
-        
-    
-    if (nb < 0)
-    {
-        nb = -nb;
-        write(1, "-", 1);
-    }
-    
     if (nb > 9)
     {
         ft_putnbr(nb / 10);
