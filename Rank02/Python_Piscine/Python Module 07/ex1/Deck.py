@@ -1,9 +1,10 @@
-from ex0.Card import Card, CardRarirty, CardType
+from ex0.Card import Card, CardType
+from typing import Dict, List, Any
 import random
 
 
 class Deck:
-    card_list: list[Card] = []
+    card_list: List[Card] = []
 
     def add_card(self, card: Card) -> None:
         self.card_list.append(card)
@@ -21,15 +22,23 @@ class Deck:
     def draw_card(self) -> Card:
         return random.choice(self.card_list)
 
-    def get_deck_stats(self) -> dict:
-        creatures = [c for c in self.card_list if c.type == CardType.CREATURE.value]
+    def get_deck_stats(self) -> Dict[str, Any]:
+        creatures = [
+            c for c in self.card_list if c.type == CardType.CREATURE.value
+        ]
         spells = [c for c in self.card_list if c.type == CardType.SPELL.value]
-        artifacts = [c for c in self.card_list if c.type == CardType.ARTIFACT.value]
-        avg = sum(c.cost for c in self.card_list) / len(self.card_list) if len(self.card_list) != 0 else 0.0
+        artifacts = [
+            c for c in self.card_list if c.type == CardType.ARTIFACT.value
+        ]
+        avg = (
+            sum(c.cost for c in self.card_list) / len(self.card_list)
+            if len(self.card_list) != 0
+            else 0.0
+        )
         return {
             "total_card": len(self.card_list),
             "creatures": len(creatures),
             "spells": len(spells),
             "artifacts": len(artifacts),
-            "avg_cost": f"{avg:.1f}"
+            "avg_cost": f"{avg:.1f}",
         }
