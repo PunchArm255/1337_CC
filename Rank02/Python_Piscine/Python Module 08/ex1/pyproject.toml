@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "matrix-wdakchi"
-version "1.0.0"
+version = "1.0.0"
 description = "hello, i'm a description."
 authors = ["mnassiri"]
 

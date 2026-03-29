@@ -3,11 +3,14 @@ import os
 import site
 
 
-def in_venv()-> bool:
+# detection for venv: we compare the sys.prefix (global python path)
+# with the one the interpreter is currently using
+def in_venv() -> bool:
     return sys.prefix != sys.base_prefix
 
 
 def main() -> None:
+    # 1st check: if we're in venv (using the in_venv func)
     if in_venv():
         print("\nMATRIX STATUS: Welcome to the construct\n")
 
@@ -22,6 +25,7 @@ def main() -> None:
         print("\nPackage installation path:"
               f"\n{site.getusersitepackages()}")
 
+    # 2nd check: if we're out of the venv
     else:
         print("\nMATRIX STATUS: You're still plugged in\n")
 
