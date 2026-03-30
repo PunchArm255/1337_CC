@@ -1,32 +1,45 @@
-#include <stdio.h>
-#include <unistd.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 
+void    ft_swap(char a, char b)
+{
+    char tmp;
+
+    tmp = a;
+    a = b;
+    b = tmp;
+}
+
+int ft_strlen(char *str)
+{
+    int i = 0;
+    while (str[i])
+        i++;
+    return i;
+}
 
 char    *ft_strrev(char *str)
 {
     int i = 0;
-    int j;
+    int j = ft_strlen(str) - 1;
     char tmp;
 
-    while (str[j])
-        j++;
-    
-    while(i < j - 1)
+    while (i < j)
     {
         tmp = str[i];
-        str[i] = str[j - 1];
-        str[j - 1] = tmp;
+        str[i] = str[j];
+        str[j] = tmp;
         i++;
         j--;
     }
 
     return str;
+
 }
 
-
-int main()
+int main(int ac, char **av)
 {
-    char *str = "hello";
-    printf("%s", ft_strrev(str));
+    printf("%s\n", ft_strrev(av[1]));
+    // printf("%s\n", strrev(av[1]));
 }

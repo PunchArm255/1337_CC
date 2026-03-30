@@ -1,16 +1,10 @@
-#include <unistd.h>
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 int		max(int* tab, unsigned int len)
 {
+    int max = tab[0];
     unsigned int i = 1;
-    int max;
-
-    if (len == 0)
-        return 0;
-
-    max = tab[0];
 
     while (i < len)
     {
@@ -21,8 +15,8 @@ int		max(int* tab, unsigned int len)
     return max;
 }
 
-int main()
-{
-    int tab[5] = {22, 101, 9, 56, 77};
-    printf("%d\n", max(tab, 5));
-}
+// int main(int ac, char **av)
+// {
+//     int tab[] = {0, 8, 7, 4, 9};
+//     printf("%d\n", max(tab, 5));
+// }

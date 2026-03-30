@@ -1,12 +1,12 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-void ft_putchar(char c)
+void    ft_putchar(char c)
 {
     write(1, &c, 1);
 }
 
-void ft_putnbr(int nb)
+void    ft_putnbr(int nb)
 {
     if (nb > 9)
     {
@@ -20,5 +20,5 @@ void ft_putnbr(int nb)
 int main(int ac, char **av)
 {
     ft_putnbr(ac - 1);
-    ft_putchar('\n');
+    write(1, "\n", 1);
 }

@@ -1,22 +1,34 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-void    ft_putchar(char c)
-{
-    write(1, &c, 1);
-}
-
-int ft_atoi(char *str)
+int	ft_atoi(const char *str)
 {
     int i = 0;
+    int sign = 1;
     int res = 0;
+
+    while ((str[i] >= '\t' && str[i] <= '\r') || str[i] == ' ')
+        i++;
+
+    if (str[i] == '-' || str[i] == '+')
+    {
+        if (str[i] == '-')
+            sign *= -1;
+        i++;
+    }
 
     while (str[i] >= '0' && str[i] <= '9')
     {
         res = (res * 10) + (str[i] - '0');
         i++;
     }
-    return res;
+
+    return res*sign;
+}
+
+void    ft_putchar(char c)
+{
+    write(1, &c, 1);
 }
 
 void    ft_puthex(int nb)
@@ -29,16 +41,15 @@ void    ft_puthex(int nb)
         ft_puthex(nb % 16);
     }
     else
-    {
         ft_putchar(base[nb]);
-    }
 }
 
 int main(int ac, char **av)
 {
     if (ac == 2)
     {
-        ft_puthex(ft_atoi(av[1]));
+        int num = ft_atoi(av[1]);
+        ft_puthex(num);
     }
     write(1, "\n", 1);
 }

@@ -1,24 +1,35 @@
-#include <unistd.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 int     *ft_rrange(int start, int end)
 {
     int i = 0;
-    int *tab;
-    int size = (end - start < 0) ? (((end - start) * 1) + 1) : ((end - start) + 1)
+    int len = (end - start) < 0 ? ((end - start) * -1) + 1 : (end - start) + 1;
+    int *res;
 
-    tab = (int *)malloc(sizeof(int) * size);
-    if (!tab)
+    res = (int *)malloc(sizeof(int) * len);
+    if (!res)
         return NULL;
-    
-    while (i < size)
+
+    while (i < len)
     {
         if (start < end)
-            tab[i] = end--;
+            res[i] = end--;
         else
-            tab[i] = end++;
+            res[i] = end++;
         i++;
     }
-
-    return tab;
+    return res;
 }
+
+// int main()
+// {
+//     int i = 0;
+//     int *tab = ft_rrange(-1, 2);
+
+//     while (i < 4)
+//     {
+//         printf("%d, ", tab[i]);
+//         i++;
+//     }
+// }

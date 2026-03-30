@@ -1,13 +1,13 @@
 unsigned char	reverse_bits(unsigned char octet)
 {
     int i = 8;
-    unsigned char rev;
+    unsigned char rev = 0;
 
-    while (i--)
+    while (i > 0)
     {
-        rev = (rev << 1) | (octet & 1);
-        octet = octet >> 1;
+        rev = (rev * 2) + (octet % 2);
+        octet = octet / 2;
+        i--;
     }
-
     return rev;
 }

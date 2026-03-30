@@ -1,11 +1,10 @@
 #include <stdio.h>
-#include <unistd.h>
-#include <stdlib.h>
+#include <string.h>
 
 size_t	ft_strcspn(const char *s, const char *reject)
 {
-    size_t i = 0; 
-    size_t j = 0;
+    size_t i = 0;
+    size_t j;
 
     while (s[i])
     {
@@ -20,3 +19,8 @@ size_t	ft_strcspn(const char *s, const char *reject)
     }
     return i;
 }
+// int main(int ac, char **av)
+// {
+//     printf("%zu\n", ft_strcspn(av[1], av[2]));
+//     printf("%zu\n", strcspn(av[1], av[2]));
+// }

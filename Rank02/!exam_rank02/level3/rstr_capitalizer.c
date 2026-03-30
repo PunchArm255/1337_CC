@@ -1,11 +1,9 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-
-void capitalizer(char *str)
+void    capitalizer(char *str)
 {
     int i = 0;
-
     while (str[i])
     {
         if (str[i] >= 'A' && str[i] <= 'Z')
@@ -15,9 +13,9 @@ void capitalizer(char *str)
             str[i] -= 32;
 
         write(1, &str[i], 1);
-
         i++;
     }
+    write(1, "\n", 1);
 }
 
 int main(int ac, char **av)
@@ -29,7 +27,6 @@ int main(int ac, char **av)
         while (i < ac)
         {
             capitalizer(av[i]);
-            write(1, "\n", 1);
             i++;
         }
     }

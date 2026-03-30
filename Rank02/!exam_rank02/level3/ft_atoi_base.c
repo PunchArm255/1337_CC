@@ -1,35 +1,31 @@
-#include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
-
-
 
 int	ft_atoi_base(const char *str, int str_base)
 {
     int i = 0;
-    int res = 0;
     int sign = 1;
-    int digit;
+    int res = 0;
+    int digit = 0;
 
-    while (str[i] <= 32)
+    while ((str[i] >= '\t' && str[i] <= '\t') || str[i] == ' ')
         i++;
 
-    if (str[i] == '-' || str[i] == '+')
+    if (str[i] == ' ' || str[i] == '+')
     {
         if (str[i] == '-')
             sign *= -1;
         i++;
     }
 
-
     while (str[i])
     {
-        if (str[i] >= '0' && str[i]<= '9')
-            digit = (str[i] - '0');
-        else if (str[i] >= 'a' && str[i] <= 'z')
-            digit = (str[i] - 'a' + 10);
-        else if (str[i] >= 'A' && str[i] <= 'Z')
-            digit = (str[i] - 'A' + 10);
+        if (str[i] >= '0' && str[i] <= '9')
+            digit = str[i] - '0';
+        else if (str[i] >= 'a' && str[i] <= 'f')
+            digit = str[i] - 'a' + 10;
+        else if (str[i] >= 'A' && str[i] <= 'F')
+            digit = str[i] - 'A' + 10;
         else
             break;
 
@@ -39,11 +35,11 @@ int	ft_atoi_base(const char *str, int str_base)
         res = (res * str_base) + (digit);
         i++;
     }
-
+    
     return (res * sign);
 }
 
-int main()
-{
-    printf("%d\n", ft_atoi_base("011", 2));
-}
+// int main(int ac, char **av)
+// {
+//     printf("%d\n", ft_atoi_base(av[1], 16));
+// }

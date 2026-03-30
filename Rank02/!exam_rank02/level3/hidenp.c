@@ -1,5 +1,6 @@
 #include <unistd.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 int main(int ac, char **av)
 {
@@ -14,12 +15,10 @@ int main(int ac, char **av)
                 i++;
             j++;
         }
-
         if (av[1][i] == '\0')
             write(1, "1", 1);
         else
             write(1, "0", 1);
     }
-
     write(1, "\n", 1);
 }
