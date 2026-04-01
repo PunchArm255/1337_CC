@@ -1,3 +1,6 @@
+#include <stdlib.h>
+
+
 unsigned int    lcm(unsigned int a, unsigned int b)
 {
     unsigned int g = (a > b) ? a : b;

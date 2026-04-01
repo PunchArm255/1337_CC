@@ -2,15 +2,6 @@
 #include <stdio.h>
 #include <string.h>
 
-void    ft_swap(char a, char b)
-{
-    char tmp;
-
-    tmp = a;
-    a = b;
-    b = tmp;
-}
-
 int ft_strlen(char *str)
 {
     int i = 0;

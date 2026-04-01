@@ -4,16 +4,11 @@ typedef struct    s_list
     void          *data;
 }                 t_list;
 
-
-int	ft_list_size(t_list *begin_list)
+void    ft_list_foreach(t_list *begin_list, void (*f)(void *))
 {
-    int size = 0;
-    
     while (begin_list)
     {
-        size++;
+        (*f)(begin_list->data);
         begin_list = begin_list->next;
     }
-
-    return size;
 }

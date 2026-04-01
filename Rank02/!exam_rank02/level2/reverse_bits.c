@@ -5,8 +5,8 @@ unsigned char	reverse_bits(unsigned char octet)
 
     while (i > 0)
     {
-        rev = (rev * 2) + (octet % 2);
-        octet = octet / 2;
+        rev = (rev << 1) | (octet & 1);
+        octet = octet >> 1;
         i--;
     }
     return rev;

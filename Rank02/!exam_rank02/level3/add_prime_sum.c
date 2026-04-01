@@ -1,6 +1,6 @@
-#include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
 
 void    ft_putchar(char c)
 {
@@ -40,19 +40,19 @@ int	ft_atoi(const char *str)
         i++;
     }
 
-    return res*sign;
+    return res*sign; 
 }
 
-int is_prime(int n)
+int is_prime(int nb)
 {
     int i = 2;
 
-    if (n < 2)
+    if (nb < 2)
         return 0;
 
-    while (i <= n / 2)
+    while (i <= nb / 2)
     {
-        if (n % i == 0)
+        if (nb % i == 0)
             return 0;
         i++;
     }
@@ -61,16 +61,16 @@ int is_prime(int n)
 
 int main(int ac, char **av)
 {
-    if (ac == 2 && ft_atoi(av[1]) > 0)
+    if (ac == 2)
     {
-        int num = ft_atoi(av[1]);
         int sum = 0;
+        int n = ft_atoi(av[1]);
 
-        while (num > 1)
+        while (n > 1)
         {
-            if (is_prime(num))
-                sum += num;
-            num--;
+            if (is_prime(n))
+                sum += n;
+            n--;
         }
         ft_putnbr(sum);
         write(1, "\n", 1);
