@@ -5,10 +5,10 @@ from typing import Self
 
 
 class ContactType(Enum):
-    RAD="radio"
-    VIS="visual"
-    PHY="physical"
-    TEL="telepathic"
+    RAD = "radio"
+    VIS = "visual"
+    PHY = "physical"
+    TEL = "telepathic"
 
 
 class AlienContact(BaseModel):
@@ -22,7 +22,7 @@ class AlienContact(BaseModel):
     message_received: str | None = Field(default=None, max_length=500)
     is_verified: bool = Field(default=False)
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def ac_validator(self) -> Self:
         val_errs = []
 
@@ -33,7 +33,8 @@ class AlienContact(BaseModel):
         if self.contact_type == ContactType.TEL and self.witness_count < 3:
             val_errs.append("Telepathic contact requires at least 3 witnesses")
         if self.signal_strength > 7.0 and not self.message_received:
-            val_errs.append("Strong signals (>7.0) should include received messages")
+            val_errs.append(
+                "Strong signals (>7.0) should include received messages")
         if val_errs:
             raise ValueError("\n".join(val_errs))
 
@@ -42,7 +43,7 @@ class AlienContact(BaseModel):
 
 def main() -> None:
     print("Alien Contact Log Validation")
-    print("======================================")
+    print("======================================\n")
     print("Valid contact report:")
 
     AC = AlienContact(
@@ -50,11 +51,11 @@ def main() -> None:
         timestamp="2026-04-01 00:00:00",
         location="Area 51, Nevada",
         contact_type=ContactType.RAD.value,
-        signal_strength= 8.5,
+        signal_strength=8.5,
         duration_minutes=45,
         witness_count=5,
         message_received="Greetings from Zeta Reticuli",
-        is_verified=True
+        is_verified=True,
     )
 
     print(f"ID: {AC.contact_id}")
@@ -65,7 +66,7 @@ def main() -> None:
     print(f"Witnesses: {AC.witness_count}")
     print(f"Message: {AC.message_received}")
 
-    print("======================================")
+    print("\n======================================")
     print("Expected validation error:")
 
     try:
@@ -74,11 +75,11 @@ def main() -> None:
             timestamp="2026-04-01 01:00:00",
             location="Namek",
             contact_type=ContactType.TEL.value,
-            signal_strength= 8.0,
+            signal_strength=8.0,
             duration_minutes=45,
             witness_count=1,
             message_received=None,
-            is_verified=False
+            is_verified=False,
         )
     except ValidationError as e:
         for err in e.errors():
