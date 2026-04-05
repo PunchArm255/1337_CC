@@ -9,7 +9,7 @@ def base_enchantment(power: int, element: str, target: str) -> str:
     return f"Enchanted {target} with {power} {element} power!"
 
 
-# ====== HIGHER ORDER FUNCS ======
+# ====== MAIN FUNCS ======
 def spell_reducer(spells: list[int], operation: str) -> int:
     if not spells:
         return 0
