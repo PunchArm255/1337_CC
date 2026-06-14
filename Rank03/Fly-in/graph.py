@@ -3,7 +3,7 @@ from data import Zone, Connection, MapStructure
 class Graph:
 
     def __init__(self, map_structure: MapStructure) -> None:
-        self.map_structure = map_structure
+        # self.map_structure = map_structure
         self.zones = map_structure.zones
         self.start_zone = map_structure.start_hub
         self.end_zone = map_structure.end_hub
@@ -35,10 +35,7 @@ class Graph:
 
 if  __name__ == "__main__":
 
-    from parser import MapParser
-
-    def map_parser(filepath: str) -> MapStructure:
-        return MapParser().parse(filepath)
+    from parser import map_parser
     
     g = Graph(map_parser("map.txt"))
 
