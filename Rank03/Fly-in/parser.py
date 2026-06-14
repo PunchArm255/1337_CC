@@ -341,11 +341,12 @@ class MapParser:
 def map_parser(filepath: str) -> MapStructure:
     return MapParser().parse(filepath)
 
-# def main():
-#     try:
-#         map_parser("map.txt")
-#         print("Everything works perfectly!")
-#     except ParsingError as e:
-#         print(e)
+def main():
+    try:
+        map_parser("map.txt")
+        print("Everything works perfectly!")
+    except ParsingError as e:
+        print(e)
 
-# main()
+if __name__ == "__main__":
+    main()

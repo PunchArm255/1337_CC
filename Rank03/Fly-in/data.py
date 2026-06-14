@@ -25,4 +25,4 @@ class MapStructure:
     start_hub: Optional[Zone] = None
     end_hub: Optional[Zone] = None
     zones: dict[str, Zone] = field(default_factory=dict)
-    connections: list[Connection] = field(default_factory=dict)
+    connections: list[Connection] = field(default_factory=list)
