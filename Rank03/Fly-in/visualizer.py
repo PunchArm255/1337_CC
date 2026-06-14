@@ -15,8 +15,22 @@ class Visualiser:
             zone2 = self.graph.get_zone(connection.zone2)
             self.axe.plot([zone1.x, zone2.x], [zone1.y, zone2.y], color="gray", zorder=1)
 
-        for z_name in self.graph.zones:
-            pass
+        ZONE_COLORS = {
+            "normal": "steelblue",
+            "restricted": "orange",
+            "priority": "lightgreen",
+            "blocked": "dimgray",
+        }
+
+        for zone in self.graph.zones.values():
+
+            if zone.color is not None:
+                fill_color = zone.color
+            else:
+                fill_color = ZONE_COLORS[zone.zone_type]
+            
+            circle = Circle((zone.x, zone.y), radius=0.4, color=fill_color, zorder=2)
+            self.axe.add_patch(circle)
 
 
 if __name__ == "__main__":
