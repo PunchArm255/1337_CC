@@ -35,8 +35,8 @@ class Graph:
 
 if  __name__ == "__main__":
 
-    from parser import map_parser
-    
+    from old_parser import map_parser
+
     g = Graph(map_parser("map.txt"))
 
     print(f"Adjacent Zones: {g.adjacency}")
