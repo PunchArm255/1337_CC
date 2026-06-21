@@ -29,26 +29,25 @@ def main():
     paths = pf.solve()
     
     engine = SimulationEngine(graph, paths)
-    
-    # 1. We instantiate the generator for the first time
     sim_generator = engine.run()
+    
+    # Track turns for the UI
+    max_turns = engine.max_turn
+    current_turn = 0
     
     viz = Visualizer(graph)
     
     start_hub_name = graph.start_zone.name
-    
-    # Initial State setup
     prev_visual_state = {f"D{i+1}": start_hub_name for i in range(parsed_map.nb_drones)}
     target_visual_state = dict(prev_visual_state)
     
-    anim_progress = 1.0  
-    anim_speed = 0.04    
-    current_turn = 0     # <--- Tracks our current turn for the HUD
+    anim_progress = 1.0
+    anim_speed = 0.04
 
     clock = pygame.time.Clock()
     running = True
     
-    print("Launch Successful! Press [SPACEBAR] to advance, [R] to restart.")
+    print("Launch Successful! Press [SPACEBAR] to advance the simulation.")
 
     while running:
         for event in pygame.event.get():
@@ -58,35 +57,21 @@ def main():
                 if event.key == pygame.K_ESCAPE:
                     running = False
                 
-                # --- RESTART ENGINE LOGIC ---
-                elif event.key == pygame.K_r:
-                    print("\n--- RESTARTING SIMULATION ---")
-                    # Throw away the old generator and create a brand new one
-                    sim_generator = engine.run()
-                    # Reset all visual states back to the start hub
-                    prev_visual_state = {f"D{i+1}": start_hub_name for i in range(parsed_map.nb_drones)}
-                    target_visual_state = dict(prev_visual_state)
-                    # Reset animation and turn counter
-                    anim_progress = 1.0
-                    current_turn = 0
-                
-                # --- SPACEBAR LOGIC ---
                 elif event.key == pygame.K_SPACE:
-                    if anim_progress >= 1.0:
+                    if anim_progress >= 1.0 and current_turn < max_turns:
                         try:
                             prev_visual_state = dict(target_visual_state)
                             target_visual_state = next(sim_generator)
                             anim_progress = 0.0
-                            current_turn += 1  # <--- Increment the Turn Counter
+                            current_turn += 1 # Update our UI Turn Counter!
                         except StopIteration:
-                            print("All drones delivered! Press R to restart.")
+                            pass
 
             elif event.type == pygame.VIDEORESIZE:
                 viz.WIDTH, viz.HEIGHT = event.w, event.h
                 viz.screen = pygame.display.get_surface()
                 viz.scale, viz.offset_x, viz.offset_y, viz.max_y = viz._calculate_scale()
                 
-        # Animation Math
         if anim_progress < 1.0:
             anim_progress += anim_speed
             if anim_progress > 1.0:
@@ -95,10 +80,10 @@ def main():
         t = anim_progress
         smooth_t = t * t * (3.0 - 2.0 * t)
 
-        # 1. Draw Map
+        # 1. Draw static background map
         viz._draw_static_map()
         
-        # 2. Draw Drones
+        # 2. Draw Drones interpolating
         for drone_id in target_visual_state.keys():
             old_str = prev_visual_state.get(drone_id, start_hub_name)
             new_str = target_visual_state.get(drone_id, start_hub_name)
@@ -111,8 +96,8 @@ def main():
             
             viz.draw_drone(drone_id, (current_x, current_y))
 
-        # 3. Draw HUD Overlay (Drawn last so it sits on top of everything)
-        viz.draw_hud(current_turn, engine.max_turn)
+        # 3. Draw the UI completely on top of everything!
+        viz.draw_ui(current_turn, max_turns)
 
         pygame.display.flip()
         clock.tick(60)
