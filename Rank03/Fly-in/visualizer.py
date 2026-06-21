@@ -1,11 +1,8 @@
-import os
-os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
-
 import pygame
+from pygame import gfxdraw  # Required for Anti-Aliased shapes
 import sys
 from graph import Graph
 from data import Zone
-from parser import ParsingError
 
 class Visualizer:
     def __init__(self, graph: Graph):
@@ -14,33 +11,30 @@ class Visualizer:
         pygame.init()
         pygame.font.init()
         
-        self.WIDTH, self.HEIGHT = 1200, 1200
-        # 1. Added pygame.RESIZABLE flag to allow dynamic window scaling
+        self.WIDTH, self.HEIGHT = 1200, 800
         self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT), pygame.RESIZABLE)
         pygame.display.set_caption("Fly-in: Drone Routing Simulation")
         
-        # Fonts
-        self.font_large = pygame.font.SysFont("Arial", 20, bold=True)
-        self.font_small = pygame.font.SysFont("Arial", 14, bold=True)
+        self.font_title = pygame.font.SysFont("Arial", 46, bold=True)
+        self.font_large = pygame.font.SysFont("Arial", 36, bold=True)
+        self.font_small = pygame.font.SysFont("Arial", 20, bold=True)
         
-        # 2. Refactored to use elegant HEX codes instead of RGB tuples
+        # 1. UPGRADE: gfxdraw requires actual Pygame Color objects, not hex strings
         self.COLORS = {
-            "bg": "#1E1E2E",           # Dark base
-            "line": "#6C7086",         # Subtle gray
-            "text": "#FFFFFF",         # White
-            "normal": "#89B4FA",       # Blue
-            "restricted": "#FAB387",   # Orange
-            "priority": "#A6E3A1",     # Green
-            "blocked": "#45475A",      # Dark gray
-            "start_stroke": "#A6E3A1", # Bright green outline
-            "end_stroke": "#F9E2AF"    # Gold outline
+            "bg": pygame.Color("#1E1E2E"),
+            "line": pygame.Color("#6C7086"),
+            "text": pygame.Color("#FFFFFF"),
+            "normal": pygame.Color("#89B4FA"),
+            "restricted": pygame.Color("#FAB387"),
+            "priority": pygame.Color("#A6E3A1"),
+            "blocked": pygame.Color("#45475A"),
+            "start_stroke": pygame.Color("#A6E3A1"),
+            "end_stroke": pygame.Color("#F9E2AF")
         }
 
-        # Calculate initial scale
         self.scale, self.offset_x, self.offset_y, self.max_y = self._calculate_scale()
 
     def _calculate_scale(self) -> tuple[float, float, float, int]:
-        """Calculates scaling to fit the map perfectly on the current screen size."""
         if not self.graph.zones:
             return 1.0, 0.0, 0.0, 0
 
@@ -64,16 +58,30 @@ class Visualizer:
         return scale, offset_x, offset_y, max_y
 
     def _get_pixel_coords(self, zone: Zone) -> tuple[int, int]:
-        """Converts logical coordinates to screen pixels and inverts the Y axis."""
         px = int(zone.x * self.scale + self.offset_x)
         py = int((self.max_y - zone.y) * self.scale + self.offset_y)
         return px, py
 
-    def _get_fill_color(self, zone: Zone) -> str:
-        """Gets the fill color: Custom if defined in map, else default type color."""
+    def _get_fill_color(self, zone: Zone) -> pygame.Color:
         if zone.color:
-            return zone.color
+            try:
+                return pygame.Color(zone.color)
+            except ValueError:
+                pass
         return self.COLORS.get(zone.zone_type, self.COLORS["normal"])
+
+    # 2. THE ANTI-ALIASING HELPER
+    def _draw_aa_circle(self, surface, color, pos, radius, width=0):
+        """Draws butter-smooth circles using gfxdraw."""
+        x, y = int(pos[0]), int(pos[1])
+        if width == 0:
+            # Filled circle needs both filled_circle and aacircle to smooth the edges
+            gfxdraw.filled_circle(surface, x, y, radius, color)
+            gfxdraw.aacircle(surface, x, y, radius, color)
+        else:
+            # To make a thick outline, we draw multiple concentric anti-aliased rings
+            for r in range(radius - width, radius + 1):
+                gfxdraw.aacircle(surface, x, y, r, color)
 
     def _draw_legend(self):
         legend_items = [
@@ -83,39 +91,45 @@ class Visualizer:
             ("Blocked", self.COLORS["blocked"])
         ]
         
-        start_x, start_y = 20, 20
+        start_x, start_y = 40, 40
         for name, color in legend_items:
-            pygame.draw.circle(self.screen, color, (start_x + 10, start_y + 10), 8)
+            self._draw_aa_circle(self.screen, color, (start_x + 15, start_y + 15), 14)
             text_surf = self.font_small.render(name, True, self.COLORS["text"])
-            self.screen.blit(text_surf, (start_x + 25, start_y + 2))
-            start_y += 25
+            self.screen.blit(text_surf, (start_x + 40, start_y + 2))
+            start_y += 40
+
+    def draw_hud(self, current_turn: int, max_turn: int):
+        """Draws the Turn Counter and Controls overlay."""
+        # --- TURN COUNTER (Top Center) ---
+        turn_text = f"TURN: {current_turn} / {max_turn}"
+        turn_surf = self.font_title.render(turn_text, True, self.COLORS["text"])
+        turn_rect = turn_surf.get_rect(center=(self.WIDTH // 2, 50))
+        self.screen.blit(turn_surf, turn_rect)
+
+        # --- CONTROLS (Bottom Right) ---
+        controls_text = "[SPACE] Next Turn   |   [R] Restart   |   [ESC] Quit"
+        ctrl_surf = self.font_small.render(controls_text, True, self.COLORS["text"])
+        ctrl_rect = ctrl_surf.get_rect(bottomright=(self.WIDTH - 40, self.HEIGHT - 30))
+        self.screen.blit(ctrl_surf, ctrl_rect)
 
     def _draw_static_map(self):
         self.screen.fill(self.COLORS["bg"])
 
-        # 1. Draw Connections
         for connection in self.graph.connections.values():
             z1 = self.graph.get_zone(connection.zone1)
             z2 = self.graph.get_zone(connection.zone2)
             
             p1 = self._get_pixel_coords(z1)
             p2 = self._get_pixel_coords(z2)
-            pygame.draw.line(self.screen, self.COLORS["line"], p1, p2, 4)
+            pygame.draw.line(self.screen, self.COLORS["line"], p1, p2, 6)
 
-        # 2. Draw Zones
         for zone in self.graph.zones.values():
             pos = self._get_pixel_coords(zone)
-            radius = 20
+            radius = 45 
             
-            # --- FILL CIRCLE ---
             fill_color = self._get_fill_color(zone)
-            try:
-                pygame.draw.circle(self.screen, fill_color, pos, radius)
-            except ValueError:
-                # Fallback just in case parser accepted a bad color string
-                pygame.draw.circle(self.screen, self.COLORS["normal"], pos, radius)
+            self._draw_aa_circle(self.screen, fill_color, pos, radius)
 
-            # --- BORDER CIRCLE (Type Indicator) ---
             if zone == self.graph.start_zone:
                 border_color = self.COLORS["start_stroke"]
             elif zone == self.graph.end_zone:
@@ -123,12 +137,8 @@ class Visualizer:
             else:
                 border_color = self.COLORS.get(zone.zone_type, self.COLORS["normal"])
                 
-            # radius + 4 makes the outline slightly larger than the filled circle
-            # width = 3 means "draw only the edge", giving us a perfect border!
-            pygame.draw.circle(self.screen, border_color, pos, radius + 4, 3)
+            self._draw_aa_circle(self.screen, border_color, pos, radius + 8, width=6)
 
-            # --- TEXT RENDER (Above the circle) ---
-            # If start or end zone, use large font and border color. Else, small white.
             if zone == self.graph.start_zone or zone == self.graph.end_zone:
                 text_color = border_color
                 font_to_use = self.font_large
@@ -137,49 +147,39 @@ class Visualizer:
                 font_to_use = self.font_small
 
             name_text = font_to_use.render(zone.name, True, text_color)
-            # pos[1] - radius - 18 pushes the text exactly above the top border
-            name_rect = name_text.get_rect(center=(pos[0], pos[1] - radius - 18))
+            name_rect = name_text.get_rect(center=(pos[0], pos[1] - radius - 26))
             self.screen.blit(name_text, name_rect)
 
         self._draw_legend()
 
-    def run(self):
-        clock = pygame.time.Clock()
-        running = True
-
-        while running:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
-                elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
-                        running = False
-                
-                # --- THE RESIZE FIX ---
-                elif event.type == pygame.VIDEORESIZE:
-                    # 1. Update our internal width and height
-                    self.WIDTH, self.HEIGHT = event.w, event.h
-                    
-                    # 2. DO NOT call set_mode() here! It drops the mouse drag.
-                    # Instead, we just grab the new surface the OS created for us.
-                    self.screen = pygame.display.get_surface()
-                    
-                    # 3. Recalculate the map scale so it stays perfectly centered!
-                    self.scale, self.offset_x, self.offset_y, self.max_y = self._calculate_scale()
-
-            self._draw_static_map()
-            pygame.display.flip()
-            clock.tick(60)
-
-        pygame.quit()
-        sys.exit()
-
-if __name__ == "__main__":
-    from parser import map_parser
-    try:
-        parsed_map = map_parser("map.txt")
-        g = Graph(parsed_map)
-        viz = Visualizer(g)
-        viz.run()
-    except ParsingError as e:
-        print(e)
+    def draw_drone(self, drone_id: str, pos: tuple[float, float]):
+        x, y = int(pos[0]), int(pos[1])
+        size = 20
+        
+        color_body = pygame.Color("#F38BA8")
+        color_arm = pygame.Color("#11111B")
+        color_rotor = pygame.Color("#94E2D5")
+        
+        offset = int(size * 0.7)
+        
+        # Arms
+        pygame.draw.line(self.screen, color_arm, (x - offset, y - offset), (x + offset, y + offset), 4)
+        pygame.draw.line(self.screen, color_arm, (x - offset, y + offset), (x + offset, y - offset), 4)
+        
+        # Rotors
+        for dx, dy in [(-1, -1), (1, 1), (-1, 1), (1, -1)]:
+            rotor_x, rotor_y = x + dx * offset, y + dy * offset
+            self._draw_aa_circle(self.screen, color_rotor, (rotor_x, rotor_y), int(size * 0.45))
+            self._draw_aa_circle(self.screen, color_arm, (rotor_x, rotor_y), int(size * 0.45), width=2)
+            
+        # Chassis
+        self._draw_aa_circle(self.screen, color_body, (x, y), int(size * 0.7))
+        self._draw_aa_circle(self.screen, color_arm, (x, y), int(size * 0.7), width=2)
+        
+        d_text = self.font_small.render(drone_id, True, self.COLORS["text"])
+        text_bg = pygame.Surface(d_text.get_size())
+        text_bg.fill(self.COLORS["bg"])
+        d_rect = d_text.get_rect(center=(x, y + size + 15))
+        
+        self.screen.blit(text_bg, d_rect)
+        self.screen.blit(d_text, d_rect)
