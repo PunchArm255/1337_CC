@@ -76,7 +76,7 @@ class Visualiser:
 
 
 if __name__ == "__main__":
-    from old_parser import map_parser
+    from parser import map_parser
     g = Graph(map_parser("map.txt"))
     viz = Visualiser(g)
     viz.draw_static()
