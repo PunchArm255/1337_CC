@@ -154,13 +154,17 @@ class Visualizer:
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         running = False
-                # --- DYNAMIC RESIZE EVENT TRIGGER ---
+                
+                # --- THE RESIZE FIX ---
                 elif event.type == pygame.VIDEORESIZE:
-                    # Capture the new window dimensions
+                    # 1. Update our internal width and height
                     self.WIDTH, self.HEIGHT = event.w, event.h
-                    # Apply them to the screen surface
-                    self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT), pygame.RESIZABLE)
-                    # RE-CALCULATE SCALE! This dynamically adjusts all coordinates.
+                    
+                    # 2. DO NOT call set_mode() here! It drops the mouse drag.
+                    # Instead, we just grab the new surface the OS created for us.
+                    self.screen = pygame.display.get_surface()
+                    
+                    # 3. Recalculate the map scale so it stays perfectly centered!
                     self.scale, self.offset_x, self.offset_y, self.max_y = self._calculate_scale()
 
             self._draw_static_map()
