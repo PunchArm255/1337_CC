@@ -1,6 +1,6 @@
 *This project has been created as part of the 42 curriculum by mnassiri.*
 
-# Fly-in: Autonomous Drone Routing
+# Fly-in
 
 ## Description
 Fly-in is a Python-based simulation engine and pathfinding algorithm designed to route a fleet of autonomous drones through a network of connected zones. The objective is to navigate all drones from a starting hub to an end hub in the fewest possible turns, while strictly adhering to zone capacities, connection limits, and varying movement costs (e.g., restricted zones). 
