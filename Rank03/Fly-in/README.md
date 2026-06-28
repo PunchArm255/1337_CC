@@ -38,4 +38,4 @@ The visualizer was built using Pygame and `pygame.gfxdraw` for hardware-accelera
 ## Resources
 - [Dijkstra's Algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm)
 - [Cooperative Pathfinding / Multi-agent Pathfinding](https://en.wikipedia.org/wiki/Multi-agent_pathfinding)
-- [Smoothstep Easing Functions](https://en.wikipedia.org/wiki/Smoothstep
+- [Smoothstep Easing Functions](https://en.wikipedia.org/wiki/Smoothstep)
