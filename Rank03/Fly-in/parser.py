@@ -1,9 +1,11 @@
+# parser.py - reads and validates the map input file
 import re
 from data import MapStructure, Zone, Connection
 
 
 class ParsingError(Exception):
-    """custom exception for parser errors so we can catch them in detail."""
+    """custom exception for parser errors."""
+
     pass
 
 
@@ -13,37 +15,29 @@ class MapParser:
     def __init__(self) -> None:
         self.map = MapStructure()
         self.line_num = 0
-        # state trackers — these enforce the ordering rules
+        # state trackers to enforce ordering: drones -> zones -> connections
         self.parsed_drones = False
         self.connections_started = False
-        # frozenset to check for duplicate connections like A-B and B-A
+        # frozenset to detect duplicate connections like A-B and B-A
         self.seen_connections: set[frozenset[str]] = set()
 
     def _parse_metadata(self, line: str) -> dict[str, str]:
-        """extracts key=value pairs from the [...] block in a line.
-
-        example: "[zone=restricted color=red max_drones=2]"
-        returns: {"zone": "restricted", "color": "red", "max_drones": "2"}
-
-        if there's no [...] block, returns empty dict (metadata is optional).
-        """
-        # finding the first '[' and extracting metadata until the first ']'
+        """extracts key=value pairs from the [...] metadata block."""
         result = re.search(r"\[(.*?)\]", line)
         if not result:
-            return {}  # no metadata found
+            return {}  # metadata is optional
 
-        # split on whitespace to get individual key=value pairs
+        # split on whitespace to extract key=value pairs
         pairs = result.group(1).split()
-        metadata = {}
+        metadata: dict[str, str] = {}
 
         for p in pairs:
-            if '=' not in p:
+            if "=" not in p:
                 raise ParsingError(
                     f"[Line {self.line_num}] Error: "
                     f"Invalid metadata format '{p}'. Expected 'key=value'."
                 )
-            # split on first '=' only, in case the value contains '='
-            k, v = p.split('=', 1)
+            k, v = p.split("=", 1)
             if not k or not v:
                 raise ParsingError(
                     f"[Line {self.line_num}] Error: "
@@ -54,75 +48,70 @@ class MapParser:
         return metadata
 
     def _parse_nb_drones(self, line: str) -> None:
-        """parses the 'nb_drones: x' line.
-
-        this must be the very first non-comment, non-empty line in the file.
-        the number must be a positive integer (no zero, no negatives).
-        """
+        """parses the 'nb_drones: <number>' line."""
         if self.parsed_drones:
             raise ParsingError(
                 f"[Line {self.line_num}] Error: "
                 "'nb_drones:' defined multiple times!"
             )
 
-        # grab everything after the colon
-        nb_str = line.split(':', 1)[1].strip()
+        # extract number after colon
+        nb_str = line.split(":", 1)[1].strip()
 
         try:
             nb_drones = int(nb_str)
             if nb_drones <= 0:
                 raise ValueError
-
         except ValueError:
             raise ParsingError(
                 f"[Line {self.line_num}] Error: "
-                f"'nb_drones must be a positive integer, got {nb_str}'"
+                f"'nb_drones' must be a positive integer, got '{nb_str}'."
             )
 
         self.map.nb_drones = nb_drones
         self.parsed_drones = True
 
     def _parsed_hubs(self, line: str) -> None:
-        """parses a zone line: start_hub, end_hub, or regular hub.
-
-        format: <type> <name> <x> <y> [metadata]
-        the [...] metadata block is optional. this method handles all
-        three zone types since they share the same format.
-        """
-        # zones must come before connections
+        """parses a zone line: start_hub:, end_hub:, or hub:."""
+        # zones must be defined before connections
         if self.connections_started:
             raise ParsingError(
                 f"[Line {self.line_num}] Error: "
-                 "Zones must be defined BEFORE connections."
+                "Zones must be defined before connections."
             )
 
-        # strip out the metadata part so we can cleanly split the core parts
+        # strip out the metadata block to parse core elements
         core_line = re.sub(r"\[.*?\]", "", line).strip()
         core_parts = core_line.split()
 
-        # expecting exactly 4 parts: prefix, name, x, y
         if len(core_parts) != 4:
             raise ParsingError(
                 f"[Line {self.line_num}] Error: "
-                "Invalid zone format. Expected: <type> <name> <x> <y>."
+                "Invalid zone format. Expected: <type>: <name> <x> <y>."
             )
 
         prefix, name, x_str, y_str = core_parts
 
-        # zone names can't have dashes bcz connections use them as separators
-        if '-' in name:
+        if prefix not in ("start_hub:", "end_hub:", "hub:"):
+            raise ParsingError(
+                f"[Line {self.line_num}] Error: "
+                f"Invalid zone prefix '{prefix}'."
+            )
+
+        # zone names cannot contain dashes because connections use dashes
+        if "-" in name:
             raise ParsingError(
                 f"[Line {self.line_num}] Error: "
                 f"Zone name '{name}' cannot contain a dash."
             )
-        # every zone must have a unique name
+
+        # all zone names must be unique
         if name in self.map.zones:
             raise ParsingError(
                 f"[Line {self.line_num}] Error: "
-                f"Duplicate zone name '{name}'"
+                f"Duplicate zone name '{name}'."
             )
 
-        # coordinates must be valid integers
         try:
             x, y = int(x_str), int(y_str)
         except ValueError:
@@ -131,10 +120,13 @@ class MapParser:
                 f"Coordinates must be integers. Got x='{x_str}', y='{y_str}'."
             )
 
-        # extract and validate metadata
         metadata = self._parse_metadata(line)
-        z_type = metadata.get("zone", "normal")
 
+        # ignore max_drones on start_hub and end_hub per subject update
+        if prefix in ("start_hub:", "end_hub:"):
+            metadata.pop("max_drones", None)
+
+        z_type = metadata.get("zone", "normal")
         if z_type not in ["normal", "blocked", "restricted", "priority"]:
             raise ParsingError(
                 f"[Line {self.line_num}] Error: "
@@ -148,81 +140,74 @@ class MapParser:
         except ValueError:
             raise ParsingError(
                 f"[Line {self.line_num}] Error: "
-                "'max_drones' must be a positive integer!"
+                "'max_drones' must be a positive integer."
             )
 
-        # make sure we don't have duplicate start or end hubs
+        # exactly one start and one end hub allowed
         if prefix == "start_hub:" and self.map.start_hub is not None:
             raise ParsingError(
                 f"[Line {self.line_num}] Error: "
                 "Multiple 'start_hub' definitions!"
             )
-        if prefix == "end_hub" and self.map.end_hub is not None:
+        if prefix == "end_hub:" and self.map.end_hub is not None:
             raise ParsingError(
                 f"[Line {self.line_num}] Error: "
                 "Multiple 'end_hub' definitions!"
             )
 
-        # create the zone and register it
         new_zone = Zone(name, x, y, z_type, max_drones, metadata.get("color"))
         self.map.zones[name] = new_zone
 
-        # also set it as start or end hub if that's what the prefix says
-        if prefix == 'start_hub:':
+        if prefix == "start_hub:":
             self.map.start_hub = new_zone
-        if prefix == 'end_hub:':
+        elif prefix == "end_hub:":
             self.map.end_hub = new_zone
 
     def _parse_connections(self, line: str) -> None:
         """parses a connection line: connection: <zone1>-<zone2> [metadata]."""
-        # once we start seeing connections, no more zones allowed
         self.connections_started = True
 
-        # strip metadata block, same approach as zone parsing
         core_line = re.sub(r"\[.*?\]", "", line).strip()
         core_parts = core_line.split()
 
-        if len(core_parts) != 2:
+        if len(core_parts) != 2 or core_parts[0] != "connection:":
             raise ParsingError(
                 f"[Line {self.line_num}] Error: "
-                "Invalid format. Expected connection: <zone1>-<zone2>"
+                "Invalid format. Expected: connection: <zone1>-<zone2>"
             )
 
         connection_str = core_parts[1]
 
-        # exactly one dash expected — zone names can't contain dashes
-        if connection_str.count('-') != 1:
+        if connection_str.count("-") != 1:
             raise ParsingError(
                 f"[Line {self.line_num}] Error: "
                 "Connection must contain exactly one dash."
             )
 
-        zone1, zone2 = connection_str.split('-')
+        zone1, zone2 = connection_str.split("-")
 
-        # self-loops make no sense for drone routing
         if zone1 == zone2:
             raise ParsingError(
                 f"[Line {self.line_num}] Error: "
                 "A zone cannot connect to itself."
             )
 
-        # both zones must already be defined (zones come before connections)
+        # both zones must already be defined
         if zone1 not in self.map.zones or zone2 not in self.map.zones:
             raise ParsingError(
                 f"[Line {self.line_num}] Error: "
-                "Connection refers to an unidentified zone."
+                "Connection refers to an undefined zone."
             )
 
-        # check for duplicates using frozenset so A-B and B-A are the same
+        # frozenset treats A-B and B-A as the exact same connection
         connection_pair = frozenset({zone1, zone2})
         if connection_pair in self.seen_connections:
             raise ParsingError(
                 f"[Line {self.line_num}] Error: "
-                f"Duplicate connection '{zone1}-{zone2}.'"
+                f"Duplicate connection '{zone1}-{zone2}'."
             )
         self.seen_connections.add(connection_pair)
 
-        # parse optional metadata (max_link_capacity)
         metadata = self._parse_metadata(line)
         try:
             max_link = int(metadata.get("max_link_capacity", "1"))
@@ -237,32 +222,35 @@ class MapParser:
         self.map.connections.append(Connection(zone1, zone2, max_link))
 
     def parse(self, filepath: str) -> MapStructure:
-        """main entry pt, reads file then returns a validated MapStructure."""
+        """reads and parses a map file, returning a validated MapStructure."""
         try:
             with open(filepath, "r") as f:
                 for line_num, line in enumerate(f, start=1):
                     self.line_num = line_num
                     line = line.strip()
 
-                    # strip inline comments (anything after #)
-                    if '#' in line:
-                        line = line.split('#', 1)[0].strip()
+                    # ignore comments
+                    if "#" in line:
+                        line = line.split("#", 1)[0].strip()
                     if not line:
                         continue
 
-                    # nb_drones must be the very first real line
-                    if not self.parsed_drones and not line.startswith("nb_drones:"):
+                    # first non-empty line must be nb_drones
+                    if (
+                        not self.parsed_drones
+                        and not line.startswith("nb_drones:")
+                    ):
                         raise ParsingError(
                             f"[Line {self.line_num}] Error: "
-                            "'nb_drones' must be the first configuration line."
+                            "'nb_drones:' must be the first line."
                         )
 
-                    # dispatch to the right handler based on prefix
+                    # dispatch line according to its prefix
                     if line.startswith("nb_drones:"):
                         self._parse_nb_drones(line)
-                    elif line.startswith(("start_hub", "end_hub", "hub")):
+                    elif line.startswith(("start_hub:", "end_hub:", "hub:")):
                         self._parsed_hubs(line)
-                    elif line.startswith("connection"):
+                    elif line.startswith("connection:"):
                         self._parse_connections(line)
                     else:
                         raise ParsingError(
@@ -275,7 +263,6 @@ class MapParser:
         except PermissionError:
             raise ParsingError(f"Error: Read permission denied '{filepath}'")
 
-        # final validation
         if not self.parsed_drones:
             raise ParsingError("Error: Map file empty or missing config.")
         if self.map.start_hub is None or self.map.end_hub is None:
@@ -286,16 +273,18 @@ class MapParser:
         return self.map
 
 
-# convenience function so you can just call map_parser("file.txt")
-# instead of doing MapParser().parse("file.txt") everywhere
 def map_parser(filepath: str) -> MapStructure:
-    """shortcut to parse a map file in one call."""
+    """convenience wrapper to parse a map file in one call."""
     return MapParser().parse(filepath)
 
 
 if __name__ == "__main__":
     try:
         parsed_map = map_parser("map.txt")
-        print("Everything works perfectly! Found", len(parsed_map.zones), "zones.")
+        print(
+            "Parsed successfully:",
+            len(parsed_map.zones),
+            "zones found."
+        )
     except ParsingError as e:
         print(e)
