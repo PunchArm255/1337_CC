@@ -4,13 +4,13 @@ from data import MapStructure, Zone, Connection
 
 
 class ParsingError(Exception):
-    """custom exception for parser errors."""
+    """Custom exception raised for map parsing and validation errors."""
 
     pass
 
 
 class MapParser:
-    """stateful parser that reads a map file and produces a MapStructure."""
+    """Stateful parser that reads a map file and produces a MapStructure."""
 
     def __init__(self) -> None:
         self.map = MapStructure()
@@ -22,7 +22,14 @@ class MapParser:
         self.seen_connections: set[frozenset[str]] = set()
 
     def _parse_metadata(self, line: str) -> dict[str, str]:
-        """extracts key=value pairs from the [...] metadata block."""
+        """Extracts key=value pairs from the [...] metadata block.
+
+        Args:
+            line: Raw input line containing optional metadata.
+
+        Returns:
+            Dictionary of parsed key-value metadata pairs.
+        """
         result = re.search(r"\[(.*?)\]", line)
         if not result:
             return {}  # metadata is optional
@@ -48,7 +55,11 @@ class MapParser:
         return metadata
 
     def _parse_nb_drones(self, line: str) -> None:
-        """parses the 'nb_drones: <number>' line."""
+        """Parses the 'nb_drones: <number>' line.
+
+        Args:
+            line: Raw line containing the drone count definition.
+        """
         if self.parsed_drones:
             raise ParsingError(
                 f"[Line {self.line_num}] Error: "
@@ -72,7 +83,11 @@ class MapParser:
         self.parsed_drones = True
 
     def _parsed_hubs(self, line: str) -> None:
-        """parses a zone line: start_hub:, end_hub:, or hub:."""
+        """Parses a zone line: start_hub:, end_hub:, or hub:.
+
+        Args:
+            line: Raw line defining a zone and its metadata.
+        """
         # zones must be defined before connections
         if self.connections_started:
             raise ParsingError(
@@ -133,6 +148,13 @@ class MapParser:
                 f"Invalid zone type '{z_type}'."
             )
 
+        # start_hub and end_hub cannot be blocked
+        if prefix in ("start_hub:", "end_hub:") and z_type == "blocked":
+            raise ParsingError(
+                f"[Line {self.line_num}] Error: "
+                f"start/end hubs cannot be defined as blocked zones."
+            )
+
         try:
             max_drones = int(metadata.get("max_drones", "1"))
             if max_drones <= 0:
@@ -164,7 +186,11 @@ class MapParser:
             self.map.end_hub = new_zone
 
     def _parse_connections(self, line: str) -> None:
-        """parses a connection line: connection: <zone1>-<zone2> [metadata]."""
+        """Parses a connection line: connection: <zone1>-<zone2> [metadata].
+
+        Args:
+            line: Raw line defining a connection between two zones.
+        """
         self.connections_started = True
 
         core_line = re.sub(r"\[.*?\]", "", line).strip()
@@ -222,7 +248,14 @@ class MapParser:
         self.map.connections.append(Connection(zone1, zone2, max_link))
 
     def parse(self, filepath: str) -> MapStructure:
-        """reads and parses a map file, returning a validated MapStructure."""
+        """Reads and parses a map file into a validated MapStructure.
+
+        Args:
+            filepath: Path to the input map file.
+
+        Returns:
+            The parsed and validated MapStructure object.
+        """
         try:
             with open(filepath, "r") as f:
                 for line_num, line in enumerate(f, start=1):
@@ -274,7 +307,14 @@ class MapParser:
 
 
 def map_parser(filepath: str) -> MapStructure:
-    """convenience wrapper to parse a map file in one call."""
+    """Convenience wrapper to parse a map file in one call.
+
+    Args:
+        filepath: Path to the map file to parse.
+
+    Returns:
+        The parsed MapStructure.
+    """
     return MapParser().parse(filepath)
 
 

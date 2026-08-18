@@ -5,7 +5,7 @@ from graph import Graph
 
 
 class Pathfinder:
-    """plans collision-free paths for all drones using dijkstra."""
+    """Plans collision-free paths for all drones using Dijkstra."""
 
     def __init__(self, graph: Graph, nb_drones: int) -> None:
         self.graph = graph
@@ -21,8 +21,21 @@ class Pathfinder:
             int, dict[frozenset[str], int]
         ] = defaultdict(lambda: defaultdict(int))
 
+        # search horizon limit to avoid infinite loops if goal is unreachable
+        self.max_search_turns = max(
+            500, len(self.graph.zones) * (self.nb_drones + 5) + 50
+        )
+
     def _zone_is_free(self, zone_name: str, turn: int) -> bool:
-        """checks if a zone has capacity for another drone at this turn."""
+        """Checks if a zone has available capacity at a specific turn.
+
+        Args:
+            zone_name: Name of the zone to check.
+            turn: Simulation turn number.
+
+        Returns:
+            True if zone can accept another drone, False otherwise.
+        """
         # start and end hubs have unlimited capacity per subject rules
         if zone_name in (
             self.graph.start_zone.name,
@@ -36,7 +49,16 @@ class Pathfinder:
         return booked < zone.max_drones
 
     def _link_is_free(self, z1: str, z2: str, turn: int) -> bool:
-        """checks if a connection has available capacity at this turn."""
+        """Checks if a connection has available capacity at a specific turn.
+
+        Args:
+            z1: Starting zone name.
+            z2: Destination zone name.
+            turn: Simulation turn number.
+
+        Returns:
+            True if the connection capacity allows traversal, False otherwise.
+        """
         # waiting in place doesn't use any connection
         if z1 == z2:
             return True
@@ -53,7 +75,16 @@ class Pathfinder:
         start_state: tuple[int, str],
         came_from: dict[tuple[int, str], tuple[int, str]],
     ) -> list[tuple[int, str]]:
-        """rebuilds the full path from start to goal by following came_from."""
+        """Reconstructs the full path from goal back to start.
+
+        Args:
+            end_state: Final (turn, zone) reached at the goal.
+            start_state: Initial (turn, zone) where drone started.
+            came_from: Map of state transitions used for backtracking.
+
+        Returns:
+            List of (turn, zone) steps forming the complete route.
+        """
         path: list[tuple[int, str]] = []
         current = end_state
         while current in came_from:
@@ -64,18 +95,30 @@ class Pathfinder:
         return path
 
     def _find_path(self, start_turn: int) -> list[tuple[int, str]]:
-        """runs time-expanded dijkstra for one drone."""
+        """Runs time-expanded Dijkstra for a single drone.
+
+        Args:
+            start_turn: The turn at which the drone departs the start hub.
+
+        Returns:
+            List of (turn, zone) tuples if a route is found, else empty list.
+        """
         start = self.graph.start_zone.name
         end = self.graph.end_zone.name
 
-        # priority queue (min-heap): lowest turn popped first
-        pq: list[tuple[int, str]] = [(start_turn, start)]
+        # heap entry: (turn, -priority_score, zone_name)
+        # priority score acts as a tie-breaker so priority zones are preferred
+        pq: list[tuple[int, int, str]] = [(start_turn, 0, start)]
         visited: set[tuple[int, str]] = set()
         came_from: dict[tuple[int, str], tuple[int, str]] = {}
+        best_cost: dict[tuple[int, str], tuple[int, int]] = {
+            (start_turn, start): (start_turn, 0)
+        }
 
         while pq:
-            curr_turn, curr_zone = heapq.heappop(pq)
+            curr_turn, neg_p, curr_zone = heapq.heappop(pq)
             state = (curr_turn, curr_zone)
+            priority_score = -neg_p
 
             # goal reached: reconstruct and return path
             if curr_zone == end:
@@ -83,17 +126,28 @@ class Pathfinder:
                     state, (start_turn, start), came_from
                 )
 
-            if state in visited:
+            # skip visited states or states exceeding search limit
+            if state in visited or curr_turn > self.max_search_turns:
                 continue
             visited.add(state)
 
             # option 1: wait in place for one turn
             wait_turn = curr_turn + 1
-            if self._zone_is_free(curr_zone, wait_turn):
+            if (
+                wait_turn <= self.max_search_turns
+                and self._zone_is_free(curr_zone, wait_turn)
+            ):
                 wait_state = (wait_turn, curr_zone)
-                if wait_state not in visited:
+                wait_cost = (wait_turn, -priority_score)
+                if (
+                    wait_state not in visited
+                    and wait_cost < best_cost.get(wait_state, (10**9, 0))
+                ):
+                    best_cost[wait_state] = wait_cost
                     came_from[wait_state] = state
-                    heapq.heappush(pq, wait_state)
+                    heapq.heappush(
+                        pq, (wait_turn, -priority_score, curr_zone)
+                    )
 
             # option 2: move to a neighboring zone
             for neighbor in self.graph.get_neighbours(curr_zone):
@@ -110,6 +164,8 @@ class Pathfinder:
                     continue
 
                 arrival_turn = curr_turn + cost
+                if arrival_turn > self.max_search_turns:
+                    continue
 
                 # check connection capacity for all transit turns
                 link_ok = True
@@ -122,13 +178,29 @@ class Pathfinder:
                 if link_ok and self._zone_is_free(neighbor, arrival_turn):
                     move_state = (arrival_turn, neighbor)
                     if move_state not in visited:
-                        came_from[move_state] = state
-                        heapq.heappush(pq, move_state)
+                        # bonus priority score if entering a priority zone
+                        p_bonus = (
+                            1 if neighbor_zone.zone_type == "priority" else 0
+                        )
+                        new_p = priority_score + p_bonus
+                        move_cost = (arrival_turn, -new_p)
+
+                        # only update and push if this is a better path
+                        if move_cost < best_cost.get(move_state, (10**9, 0)):
+                            best_cost[move_state] = move_cost
+                            came_from[move_state] = state
+                            heapq.heappush(
+                                pq, (arrival_turn, -new_p, neighbor)
+                            )
 
         return []
 
     def _reserve_path(self, path: list[tuple[int, str]]) -> None:
-        """marks all zones and links used by a path as booked."""
+        """Marks all zones and links used by a path as booked.
+
+        Args:
+            path: The planned route for a drone.
+        """
         for j in range(len(path) - 1):
             t_from, z_from = path[j]
             t_to, z_to = path[j + 1]
@@ -143,7 +215,11 @@ class Pathfinder:
                     self.link_reservations[t][link_key] += 1
 
     def solve(self) -> list[list[tuple[int, str]]]:
-        """plans paths for all drones, one at a time."""
+        """Plans collision-free paths for all drones, one at a time.
+
+        Returns:
+            List of paths, one per drone.
+        """
         all_paths: list[list[tuple[int, str]]] = []
 
         for i in range(self.nb_drones):

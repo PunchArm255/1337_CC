@@ -16,7 +16,16 @@ from visualizer import Visualizer  # noqa: E402
 def get_drone_pixel_pos(
     viz: Visualizer, graph: Graph, state_str: str
 ) -> tuple[float, float]:
-    """converts a drone's state string to screen pixel coordinates."""
+    """Converts a drone's state string to screen pixel coordinates.
+
+    Args:
+        viz: Visualizer instance.
+        graph: Network Graph instance.
+        state_str: Node name or connection 'zoneA-zoneB' string.
+
+    Returns:
+        Tuple of (x, y) pixel coordinates.
+    """
     # if state is "zoneA-zoneB", drone is in transit (draw at midpoint)
     if "-" in state_str:
         z1_name, z2_name = state_str.split("-")
@@ -36,7 +45,14 @@ def get_drone_pixel_pos(
 
 
 def smoothstep(t: float) -> float:
-    """eases in and out between 0 and 1 using the 3t^2 - 2t^3 curve."""
+    """Eases in and out between 0 and 1 using the 3t^2 - 2t^3 curve.
+
+    Args:
+        t: Normalized time value between 0.0 and 1.0.
+
+    Returns:
+        Smoothed interpolation value between 0.0 and 1.0.
+    """
     return t * t * (3.0 - 2.0 * t)
 
 
@@ -46,7 +62,14 @@ def run_simulation(
     nb_drones: int,
     viz: Visualizer,
 ) -> None:
-    """handles pygame event loop, animation, and rendering."""
+    """Handles pygame event loop, animation, and rendering.
+
+    Args:
+        graph: Network Graph instance.
+        paths: List of calculated paths for each drone.
+        nb_drones: Total number of drones.
+        viz: Visualizer instance.
+    """
     engine = SimulationEngine(graph, paths)
     sim_gen = engine.run()
 
@@ -63,9 +86,6 @@ def run_simulation(
 
     clock = pygame.time.Clock()
     running = True
-
-    print("Controls: [SPACE] advance, [R] restart, [ESC] quit")
-    print()
 
     while running:
         # process user input events
@@ -122,8 +142,7 @@ def run_simulation(
 
             viz.draw_drone(drone_id, (current_x, current_y))
 
-        is_finished = current_turn >= max_turns
-        viz.draw_turn_counter(current_turn, max_turns, is_finished)
+        viz.draw_turn_counter(current_turn, max_turns)
         viz.draw_legend()
 
         pygame.display.flip()
@@ -131,7 +150,7 @@ def run_simulation(
 
 
 def main() -> None:
-    """main program entry point."""
+    """Main program entry point."""
     map_file = sys.argv[1] if len(sys.argv) > 1 else "map.txt"
 
     # step 1: parse map file
@@ -141,24 +160,18 @@ def main() -> None:
         print(f"Parsing error: {e}")
         return
 
-    print(f"Loaded map: {map_file}")
-    print(f"  zones: {len(parsed_map.zones)}")
-    print(f"  connections: {len(parsed_map.connections)}")
-    print(f"  drones: {parsed_map.nb_drones}")
-    print()
-
     # step 2: construct graph
     graph = Graph(parsed_map)
 
     # step 3: calculate collision-free paths
-    print("Calculating routes with dijkstra...")
     pf = Pathfinder(graph, parsed_map.nb_drones)
     paths = pf.solve()
-    print("Pathfinding complete!")
-    print()
 
     # step 4: initialize pygame visualizer
     viz = Visualizer(graph)
+
+    print("Controls: [SPACE] advance, [R] restart, [ESC] quit")
+    print()
 
     # step 5: run interactive loop (pressing R restarts loop)
     while True:

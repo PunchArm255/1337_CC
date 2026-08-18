@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 
 @dataclass
 class Zone:
-    """represents a single zone in the drone network."""
+    """Represents a single zone in the drone network."""
 
     name: str
     x: int
@@ -16,7 +16,7 @@ class Zone:
 
 @dataclass
 class Connection:
-    """represents a bidirectional link between two zones."""
+    """Represents a bidirectional link between two zones."""
 
     zone1: str
     zone2: str
@@ -25,7 +25,7 @@ class Connection:
 
 @dataclass
 class MapStructure:
-    """the complete parsed result of a map file."""
+    """The complete parsed result of a map file."""
 
     nb_drones: int = 0
     start_hub: Zone | None = None

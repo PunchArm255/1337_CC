@@ -23,11 +23,10 @@ COLOR_DRONE_BODY = (243, 139, 168)
 COLOR_DRONE_ARM = (17, 17, 27)
 COLOR_DRONE_ROTOR = (148, 226, 213)
 COLOR_LABEL_BG = (49, 50, 68, 230)
-COLOR_PANEL_BG = (30, 30, 46, 210)
 
 
 class Visualizer:
-    """handles pygame rendering for the drone network simulation."""
+    """Handles pygame rendering for the drone network simulation."""
 
     def __init__(self, graph: Graph) -> None:
         self.graph = graph
@@ -54,7 +53,11 @@ class Visualizer:
         )
 
     def _calculate_layout(self) -> tuple[float, float, float, int]:
-        """computes scaling and offsets to center the map nicely."""
+        """Computes scaling and offsets to center the map nicely.
+
+        Returns:
+            Tuple of (scale, offset_x, offset_y, max_y).
+        """
         if not self.graph.zones:
             return 1.0, 0.0, 0.0, 0
 
@@ -80,17 +83,25 @@ class Visualizer:
         return scale, offset_x, offset_y, max_y
 
     def zone_to_pixel(self, zone: Zone) -> tuple[int, int]:
-        """converts map coordinates to screen pixels.
+        """Converts map coordinates to screen pixels.
 
-        the y-axis is flipped because in map coordinates y goes up,
-        while in pygame screen coordinates y goes down (max_y - zone.y).
+        Args:
+            zone: Zone dataclass instance with x, y coordinates.
+
+        Returns:
+            Tuple of (pixel_x, pixel_y).
         """
         px = int(zone.x * self.scale + self.offset_x)
         py = int((self.max_y - zone.y) * self.scale + self.offset_y)
         return px, py
 
     def recalculate_on_resize(self, new_width: int, new_height: int) -> None:
-        """updates display dimensions and recalculates layout on resize."""
+        """Updates display dimensions and recalculates layout on resize.
+
+        Args:
+            new_width: Updated window width in pixels.
+            new_height: Updated window height in pixels.
+        """
         self.width = new_width
         self.height = new_height
         self.screen = pygame.display.set_mode(
@@ -101,7 +112,7 @@ class Visualizer:
         )
 
     def _get_zone_type_color(self, zone_type: str) -> tuple[int, int, int]:
-        """maps zone type to standard color tuple."""
+        """Maps zone type to standard color tuple."""
         if zone_type == "restricted":
             return COLOR_RESTRICTED
         if zone_type == "priority":
@@ -113,7 +124,7 @@ class Visualizer:
     def _get_zone_fill_color(
         self, zone: Zone
     ) -> tuple[int, int, int] | pygame.Color:
-        """determines fill color for a zone."""
+        """Determines fill color for a zone."""
         # use custom color string if specified in map file
         if zone.color:
             try:
@@ -123,7 +134,7 @@ class Visualizer:
         return self._get_zone_type_color(zone.zone_type)
 
     def draw_background(self) -> None:
-        """draws background, connections, zone nodes, and labels."""
+        """Draws background, connections, zone nodes, and labels."""
         self.screen.fill(COLOR_BG)
 
         # 1. draw connection lines behind nodes
@@ -167,7 +178,7 @@ class Visualizer:
             self.screen.blit(name_surf, name_rect)
 
     def draw_legend(self) -> None:
-        """draws a small compact legend in the top-left corner."""
+        """Draws the zone type indicators and keybind controls."""
         items: list[tuple[str, tuple[int, int, int]]] = [
             ("Normal", COLOR_NORMAL),
             ("Restricted", COLOR_RESTRICTED),
@@ -182,32 +193,31 @@ class Visualizer:
             self.screen.blit(text_surf, (x + 16, y))
             y += 18
 
-    def draw_turn_counter(
-        self, current_turn: int, max_turns: int, is_finished: bool
-    ) -> None:
-        """draws a compact turn counter badge in the top-right corner."""
-        turn_str = f"Turn: {current_turn} / {max_turns}"
-        turn_color = COLOR_START if is_finished else COLOR_TEXT
-
-        text_surf = self.font_turn.render(turn_str, True, turn_color)
-        pad_x, pad_y = 12, 6
-        badge_w = text_surf.get_width() + pad_x * 2
-        badge_h = text_surf.get_height() + pad_y * 2
-
-        pos_x = self.width - badge_w - 16
-        pos_y = 16
-
-        # transparent panel with border
-        badge = pygame.Surface((badge_w, badge_h), pygame.SRCALPHA)
-        badge.fill(COLOR_PANEL_BG)
-        pygame.draw.rect(
-            badge, COLOR_LINE, badge.get_rect(), 1, border_radius=6
+        # controls hint
+        ctrls_surf = self.font_small.render(
+            "[SPACE] Step  [R] Reset  [ESC] Exit", True, COLOR_NORMAL
         )
-        self.screen.blit(badge, (pos_x, pos_y))
-        self.screen.blit(text_surf, (pos_x + pad_x, pos_y + pad_y))
+        self.screen.blit(ctrls_surf, (x, y + 6))
+
+    def draw_turn_counter(self, current_turn: int, max_turns: int) -> None:
+        """Draws turn counter text in the top-right corner.
+
+        Args:
+            current_turn: Current turn number.
+            max_turns: Total turns in the simulation.
+        """
+        turn_str = f"Turn: {current_turn} / {max_turns}"
+        text_surf = self.font_turn.render(turn_str, True, COLOR_TEXT)
+        pos_x = self.width - text_surf.get_width() - 16
+        self.screen.blit(text_surf, (pos_x, 16))
 
     def draw_drone(self, drone_id: str, pos: tuple[float, float]) -> None:
-        """draws a drone sprite at the specified pixel coordinates."""
+        """Draws a drone sprite at the specified pixel coordinates.
+
+        Args:
+            drone_id: Unique drone identifier string (e.g. 'D1').
+            pos: Tuple of (x, y) float coordinates.
+        """
         x, y = int(pos[0]), int(pos[1])
         size = 12
         offset = int(size * 0.7)

@@ -4,7 +4,7 @@ from graph import Graph
 
 
 class SimulationEngine:
-    """converts pathfinder paths into discrete turn events."""
+    """Converts pathfinder paths into discrete turn events."""
 
     def __init__(
         self,
@@ -23,7 +23,15 @@ class SimulationEngine:
         path: list[tuple[int, str]],
         turn: int,
     ) -> tuple[str | None, str]:
-        """evaluates a drone's action for a turn."""
+        """Evaluates a drone's action for a specific turn.
+
+        Args:
+            path: Drone route as a list of (turn, zone) tuples.
+            turn: Current simulation turn number.
+
+        Returns:
+            Tuple of (output_string_or_None, visual_position_string).
+        """
         for j in range(len(path) - 1):
             t_prev, z_prev = path[j]
             t_next, z_next = path[j + 1]
@@ -47,7 +55,11 @@ class SimulationEngine:
         return (None, path[0][1] if path else "")
 
     def run(self) -> Generator[dict[str, str], None, None]:
-        """runs the simulation turns, printing moves and yielding state."""
+        """Runs the simulation turns, printing moves and yielding visual state.
+
+        Yields:
+            Dictionary mapping drone ID to current position string.
+        """
         print(f"--- SIMULATION START ({self.max_turn} turns) ---")
         print()
 

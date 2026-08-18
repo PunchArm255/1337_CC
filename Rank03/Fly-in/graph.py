@@ -3,7 +3,7 @@ from data import Zone, Connection, MapStructure
 
 
 class Graph:
-    """graph representation of the drone network."""
+    """Graph representation of the drone network."""
 
     def __init__(self, map_structure: MapStructure) -> None:
         if (
@@ -34,22 +34,51 @@ class Graph:
             self.adjacency[cnx.zone2].append(cnx.zone1)
 
     def get_neighbours(self, z_name: str) -> list[str]:
-        """returns all neighboring zones for a given zone."""
+        """Returns all neighboring zones for a given zone.
+
+        Args:
+            z_name: Name of the origin zone.
+
+        Returns:
+            List of neighboring zone names.
+        """
         return self.adjacency.get(z_name, [])
 
     def get_connection(
         self, z_name1: str, z_name2: str
     ) -> Connection | None:
-        """looks up the connection object between two zones."""
+        """Looks up the connection object between two zones.
+
+        Args:
+            z_name1: First zone name.
+            z_name2: Second zone name.
+
+        Returns:
+            The Connection object if a link exists, else None.
+        """
         k = frozenset({z_name1, z_name2})
         return self.connections.get(k)
 
     def get_zone(self, z_name: str) -> Zone | None:
-        """returns zone object if it exists, else None."""
+        """Looks up a zone by name.
+
+        Args:
+            z_name: Name of the zone.
+
+        Returns:
+            Zone object if found, else None.
+        """
         return self.zones.get(z_name)
 
     def get_move_cost(self, dest_name: str) -> int:
-        """returns turn cost to enter a zone."""
+        """Returns turn cost to enter a destination zone.
+
+        Args:
+            dest_name: Target zone name.
+
+        Returns:
+            Turn cost (1 for normal/priority, 2 for restricted, 0 for blocked).
+        """
         zone = self.get_zone(dest_name)
         # blocked zones cannot be entered
         if not zone or zone.zone_type == "blocked":
