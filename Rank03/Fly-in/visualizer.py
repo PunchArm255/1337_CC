@@ -163,7 +163,7 @@ class Visualizer:
             else:
                 border_color = self._get_zone_type_color(zone.zone_type)
 
-            pygame.draw.circle(self.screen, border_color, pos, radius + 3, 3)
+            pygame.draw.circle(self.screen, border_color, pos, radius + 4, 3)
 
             # text label above zone node
             text_color = (
@@ -195,7 +195,7 @@ class Visualizer:
 
         # controls hint
         ctrls_surf = self.font_small.render(
-            "[SPACE] Step  [R] Reset  [ESC] Exit", True, COLOR_NORMAL
+            "[SPACE] Move  [R] Reset  [ESC] Exit", True, COLOR_TEXT
         )
         self.screen.blit(ctrls_surf, (x, y + 6))
 

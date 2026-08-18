@@ -60,7 +60,7 @@ class SimulationEngine:
         Yields:
             Dictionary mapping drone ID to current position string.
         """
-        print(f"--- SIMULATION START ({self.max_turn} turns) ---")
+        print(f"\n--- SIMULATION START ({self.max_turn} turns) ---")
         print()
 
         for turn in range(1, self.max_turn + 1):
@@ -84,10 +84,3 @@ class SimulationEngine:
 
             # yield passes the visual state dict to pygame for rendering
             yield visual_state
-
-        print()
-        print("--- SIMULATION COMPLETE ---")
-        print(f"    total turns: {self.max_turn}")
-        delivered = len([p for p in self.paths if p])
-        total = len(self.paths)
-        print(f"    drones delivered: {delivered} / {total}")

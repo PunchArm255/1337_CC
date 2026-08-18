@@ -92,11 +92,13 @@ def run_simulation(
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
+                print("\n--- SIMULATION COMPLETED ---")
                 sys.exit(0)
 
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     pygame.quit()
+                    print("\n--- SIMULATION COMPLETED ---")
                     sys.exit(0)
 
                 elif event.key == pygame.K_SPACE:
@@ -157,7 +159,7 @@ def main() -> None:
     try:
         parsed_map = map_parser(map_file)
     except ParsingError as e:
-        print(f"Parsing error: {e}")
+        print(e)
         return
 
     # step 2: construct graph
@@ -170,10 +172,7 @@ def main() -> None:
     # step 4: initialize pygame visualizer
     viz = Visualizer(graph)
 
-    print("Controls: [SPACE] advance, [R] restart, [ESC] quit")
-    print()
-
-    # step 5: run interactive loop (pressing R restarts loop)
+    # step 5: run simulation loop (pressing R restarts loop)
     while True:
         run_simulation(graph, paths, parsed_map.nb_drones, viz)
         print()
@@ -185,8 +184,8 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        # exit cleanly on ctrl+c without traceback
-        print("\nSimulation aborted by user.")
+        # exit cleanly on ctrl+c
+        print("\n--- SIMULATION ABORTED ---")
         try:
             pygame.quit()
         except Exception:

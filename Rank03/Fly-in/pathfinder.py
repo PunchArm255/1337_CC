@@ -1,4 +1,5 @@
 # pathfinder.py - finds the shortest path for each drone using dijkstra
+import sys
 import heapq
 from collections import defaultdict
 from graph import Graph
@@ -229,8 +230,9 @@ class Pathfinder:
 
             if not path:
                 print(
-                    f"  warning: drone D{i + 1} could not find path to goal!"
+                    f"[ERROR]: D{i + 1} could not find path to goal!"
                 )
+                sys.exit(0)
             else:
                 self._reserve_path(path)
 
