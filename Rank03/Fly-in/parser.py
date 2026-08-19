@@ -30,7 +30,7 @@ class MapParser:
         Returns:
             Dictionary of parsed key-value metadata pairs.
         """
-        result = re.search(r"\[(.*?)\]", line)
+        result = re.search(r" \[(.*?)\]$", line)
         if not result:
             return {}  # metadata is optional
 
@@ -49,6 +49,11 @@ class MapParser:
                 raise ParsingError(
                     f"[Line {self.line_num}] Error: "
                     f"Metadata key or value cannot be empty in '{p}'."
+                )
+            if k in metadata:
+                raise ParsingError(
+                    f"[Line {self.line_num}] Error: "
+                    f"Duplicate metadata key '{k}' found."
                 )
             metadata[k] = v
 
@@ -96,7 +101,7 @@ class MapParser:
             )
 
         # strip out the metadata block to parse core elements
-        core_line = re.sub(r"\[.*?\]", "", line).strip()
+        core_line = re.sub(r" \[(.*?)\]$", "", line).strip()
         core_parts = core_line.split()
 
         if len(core_parts) != 4:
@@ -136,6 +141,14 @@ class MapParser:
             )
 
         metadata = self._parse_metadata(line)
+        allowed_zone_keys = {"zone", "max_drones", "color"}
+        for k in metadata:
+            if k not in allowed_zone_keys:
+                raise ParsingError(
+                    f"[Line {self.line_num}] Error: "
+                    f"Unknown metadata key '{k}' for a zone."
+                    f"\n- Allowed keys: 'zone', 'max_drones', 'color'."
+                )
 
         # ignore max_drones on start_hub and end_hub per subject update
         if prefix in ("start_hub:", "end_hub:"):
@@ -193,7 +206,7 @@ class MapParser:
         """
         self.connections_started = True
 
-        core_line = re.sub(r"\[.*?\]", "", line).strip()
+        core_line = re.sub(r" \[(.*?)\]$", "", line).strip()
         core_parts = core_line.split()
 
         if len(core_parts) != 2 or core_parts[0] != "connection:":
@@ -235,6 +248,14 @@ class MapParser:
         self.seen_connections.add(connection_pair)
 
         metadata = self._parse_metadata(line)
+        allowed_cnx_keys = {"max_link_capacity"}
+        for k in metadata:
+            if k not in allowed_cnx_keys:
+                raise ParsingError(
+                    f"[Line {self.line_num}] Error: "
+                    f"Unknown metadata key '{k}' for a connection."
+                    f"\n- Allowed key: 'max_link_capacity'."
+                )
         try:
             max_link = int(metadata.get("max_link_capacity", "1"))
             if max_link <= 0:

@@ -92,13 +92,13 @@ def run_simulation(
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                print("\n--- SIMULATION COMPLETED ---")
+                print("\n--- SIMULATION FINISHED ---")
                 sys.exit(0)
 
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     pygame.quit()
-                    print("\n--- SIMULATION COMPLETED ---")
+                    print("\n--- SIMULATION FINISHED ---")
                     sys.exit(0)
 
                 elif event.key == pygame.K_SPACE:
@@ -167,7 +167,11 @@ def main() -> None:
 
     # step 3: calculate collision-free paths
     pf = Pathfinder(graph, parsed_map.nb_drones)
-    paths = pf.solve()
+    try:
+        paths = pf.solve()
+    except ValueError as e:
+        print(e)
+        return
 
     # step 4: initialize pygame visualizer
     viz = Visualizer(graph)
@@ -175,16 +179,13 @@ def main() -> None:
     # step 5: run simulation loop (pressing R restarts loop)
     while True:
         run_simulation(graph, paths, parsed_map.nb_drones, viz)
-        print()
-        print("--- RESTARTING SIMULATION ---")
-        print()
+        print("\n--- RESTARTING SIMULATION ---\n")
 
 
 if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        # exit cleanly on ctrl+c
         print("\n--- SIMULATION ABORTED ---")
         try:
             pygame.quit()

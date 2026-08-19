@@ -38,13 +38,13 @@ class SimulationEngine:
 
             if t_prev < turn <= t_next:
                 if z_prev == z_next:
-                    # drone is waiting in place - omit from output per subject
+                    # drone is waiting in place, no output
                     return (None, z_prev)
                 elif turn == t_next:
                     # drone arrived at destination zone
                     return (z_next, z_next)
                 else:
-                    # drone is mid-transit on connection to restricted zone
+                    # drone is mid-transit on cnx to restricted zone
                     connection_name = f"{z_prev}-{z_next}"
                     return (connection_name, connection_name)
 
