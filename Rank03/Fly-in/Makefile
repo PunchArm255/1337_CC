@@ -1,6 +1,6 @@
-PYTHON := python3
-PIP := pip3
-MAP ?= map.txt
+PYTHON = python3
+PIP = pip3
+MAP = map.txt
 
 .PHONY: all install run debug clean lint lint-strict
 

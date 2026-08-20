@@ -30,7 +30,7 @@ class MapParser:
         Returns:
             Dictionary of parsed key-value metadata pairs.
         """
-        result = re.search(r" \[(.*?)\]$", line)
+        result = re.search(r" \[([^\[\]]*)\]$", line)
         if not result:
             return {}  # metadata is optional
 
@@ -101,7 +101,7 @@ class MapParser:
             )
 
         # strip out the metadata block to parse core elements
-        core_line = re.sub(r" \[(.*?)\]$", "", line).strip()
+        core_line = re.sub(r" \[([^\[\]]*)\]$", "", line).strip()
         core_parts = core_line.split()
 
         if len(core_parts) != 4:
@@ -206,7 +206,7 @@ class MapParser:
         """
         self.connections_started = True
 
-        core_line = re.sub(r" \[(.*?)\]$", "", line).strip()
+        core_line = re.sub(r" \[([^\[\]]*)\]$", "", line).strip()
         core_parts = core_line.split()
 
         if len(core_parts) != 2 or core_parts[0] != "connection:":

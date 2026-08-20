@@ -89,23 +89,13 @@ connection: corridor-goal
 
 ### Expected Output
 ```text
-Loaded map: map.txt
-  zones: 3
-  connections: 2
-  drones: 2
-
-Calculating routes with dijkstra...
-Pathfinding complete!
-
 --- SIMULATION START (3 turns) ---
 
 Turn   1: D1-corridor
 Turn   2: D1-goal D2-corridor
 Turn   3: D2-goal
 
---- SIMULATION COMPLETE ---
-    total turns: 3
-    drones delivered: 2 / 2
+--- SIMULATION FINISHED ---
 ```
 
 ---
@@ -113,13 +103,11 @@ Turn   3: D2-goal
 ## Resources & AI Usage
 
 ### References
-- [Dijkstra's Algorithm](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm)
-- [Multi-Agent Path Finding (MAPF)](https://en.wikipedia.org/wiki/Multi-agent_pathfinding)
-- [Pygame Documentation](https://www.pygame.org/docs/)
-- [Smoothstep Interpolation](https://en.wikipedia.org/wiki/Smoothstep)
+- Dijkstra's Algorithm: https://www.youtube.com/watch?v=EFg3u_E6eHU&t=309s&pp=ygUSZGlqa3N0cmEgYWxnb3JpdGht
+- Pygame Documentation: https://www.pygame.org/docs/
 
 ### AI Usage
 AI assistance was utilized during this project for:
 - Refining the time-expanded state representation and reservation logic.
 - Designing the Pygame rendering pipeline and smoothstep animation math.
-- Setting up the project Makefile, type annotations, and linting configurations.
+- Setting up the project type annotations, and linting configurations.

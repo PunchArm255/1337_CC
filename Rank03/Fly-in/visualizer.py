@@ -78,7 +78,7 @@ class Visualizer:
 
         # center coordinates in window
         offset_x = (self.width / 2) - ((map_w * scale) / 2) - (min_x * scale)
-        offset_y = (self.height / 2) - ((map_h * scale) / 2) - (min_y * scale)
+        offset_y = (self.height / 2) - ((map_h * scale) / 2)
 
         return scale, offset_x, offset_y, max_y
 
