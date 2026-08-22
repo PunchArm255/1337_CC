@@ -6,7 +6,7 @@
 /*   By: mnassiri <mnassiri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/22 15:41:44 by mnassiri          #+#    #+#             */
-/*   Updated: 2026/08/22 17:17:04 by mnassiri         ###   ########.fr       */
+/*   Updated: 2026/08/22 18:02:50 by mnassiri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,6 @@ int	acquire_dongle(t_dongle *d, int coder_id, long long deadline, t_sim *sim)
 	enter_queue(d->queue, coder_id, get_time_ms(), deadline);
 	while (!sim_should_stop(sim) && must_wait(d, coder_id))
 	{
-		
 	}
 	leave_queue(d->queue, coder_id);
 	pthread_mutex_unlock(&d->acquire_mtx);
