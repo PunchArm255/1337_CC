@@ -1,21 +1,30 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   dongle.h                                           :+:      :+:    :+:   */
+/*   utils2.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mnassiri <mnassiri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/08/20 18:22:54 by mnassiri          #+#    #+#             */
-/*   Updated: 2026/08/20 18:24:13 by mnassiri         ###   ########.fr       */
+/*   Created: 2026/08/22 17:03:58 by mnassiri          #+#    #+#             */
+/*   Updated: 2026/08/22 17:04:29 by mnassiri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef DONGLE_H
-#define DONGLE_H
+#include "codexion.h"
 
-typedef struct s_dongle
+int    sim_should_stop(t_sim *sim)
 {
+    int val;
 
-} t_dongle;
+    pthread_mutex_lock(&sim->state_mtx);
+    val = sim->should_stop;
+    pthread_mutex_unlock(&sim->state_mtx);
+    return (val);
+}
 
-#endif
+void    sim_request_stop(t_sim *sim)
+{
+    pthread_mutex_lock(&sim->state_mtx);
+    sim->should_stop = 1;
+    pthread_mutex_unlock(&sim->state_mtx);
+}

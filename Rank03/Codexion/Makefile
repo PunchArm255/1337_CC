@@ -1,24 +1,17 @@
-NAME = codexion
+NAME        = codexion
+CC          = cc
+CFLAGS      = -Wall -Wextra -Werror -pthread
+INC         = -I include
 
-CC = cc
+SRC_DIR     = src
+OBJ_DIR     = obj
 
-CFLAGS = -Wall -Wextra -Werror -pthread
+SRC_FILES   = main.c parse.c utils.c
+OBJ_FILES   = $(SRC_FILES:.c=.o)
 
-SRC_DIR = src
+SRC         = $(addprefix $(SRC_DIR)/, $(SRC_FILES))
+OBJ         = $(addprefix $(OBJ_DIR)/, $(OBJ_FILES))
 
-INC_DIR = includes
-
-OBJ_DIR = obj
-
-SRC = main.c \
-	parser.c \
-	dongle.c \
-	coder.c \
-	sim.c
-
-OBJ = $(addprefix $(OBJ_DIR)/, $(SRC:.c=.o))
-
-INCLUDES = -I$(INC_DIR)
 
 all: $(NAME)
 
@@ -26,7 +19,7 @@ $(NAME): $(OBJ)
 	$(CC) $(CFLAGS) $(OBJ) -o $(NAME)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
-	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+	$(CC) $(CFLAGS) $(INC) -c $< -o $@
 
 $(OBJ_DIR):
 	mkdir -p $(OBJ_DIR)
