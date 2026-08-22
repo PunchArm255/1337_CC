@@ -6,7 +6,7 @@
 /*   By: mnassiri <mnassiri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/22 10:51:24 by mnassiri          #+#    #+#             */
-/*   Updated: 2026/08/22 18:02:20 by mnassiri         ###   ########.fr       */
+/*   Updated: 2026/08/22 18:41:11 by mnassiri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,6 +99,7 @@ long					ft_atol(const char *str);
 long					get_time_ms(void);
 void					free_queue(t_queue *q);
 void					print_long(t_sim *sim, int id, char *msg);
+void					ms_to_timespec(struct timespec *ts, long long ms);
 
 /*utils2.c*/
 int						sim_should_stop(t_sim *sim);

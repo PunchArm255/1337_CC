@@ -6,7 +6,7 @@
 /*   By: mnassiri <mnassiri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/22 11:55:36 by mnassiri          #+#    #+#             */
-/*   Updated: 2026/08/22 17:52:33 by mnassiri         ###   ########.fr       */
+/*   Updated: 2026/08/22 18:26:55 by mnassiri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,10 @@ long long	get_time_ms(void)
 
 void	ms_to_timespec(struct timespec *ts, long long ms)
 {
+	if (ms < 0)
+		ms = 0;
+	ts->tv_sec = ms / 1000;
+	ts->tv_nsec = (ms % 1000) * 1000000L;
 }
 
 /*CHECK FAILURE CASES FOR THE FUNC BELOW (DATARACE/DEADLOCK)*/
