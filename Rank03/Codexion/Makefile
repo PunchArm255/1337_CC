@@ -6,7 +6,7 @@ INC         = -I include
 SRC_DIR     = src
 OBJ_DIR     = obj
 
-SRC_FILES   = main.c parse.c utils.c
+SRC_FILES   = main.c parse.c utils.c utils2.c coder.c dongle.c init.c routine.c queue.c
 OBJ_FILES   = $(SRC_FILES:.c=.o)
 
 SRC         = $(addprefix $(SRC_DIR)/, $(SRC_FILES))

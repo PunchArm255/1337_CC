@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mnassiri <mnassiri@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: simo <simo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/22 11:55:36 by mnassiri          #+#    #+#             */
-/*   Updated: 2026/08/22 18:26:55 by mnassiri         ###   ########.fr       */
+/*   Updated: 2026/08/23 19:28:11 by simo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,11 +59,7 @@ void	ms_to_timespec(struct timespec *ts, long long ms)
 void	print_log(t_sim *sim, int id, char *msg)
 {
 	long	time;
-	int		stop;
 
-	pthread_mutex_lock(&sim->state_mtx);
-	stop = sim->should_stop;
-	pthread_mutex_unlock(&sim->state_mtx);
 	pthread_mutex_lock(&sim->log_mtx);
 	time = get_time_ms() - sim->start_time;
 	printf("%ld %d %s\n", time, id, msg);

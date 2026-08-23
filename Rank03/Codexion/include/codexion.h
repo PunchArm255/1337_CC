@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   codexion.h                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mnassiri <mnassiri@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: simo <simo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/22 10:51:24 by mnassiri          #+#    #+#             */
-/*   Updated: 2026/08/22 18:41:11 by mnassiri         ###   ########.fr       */
+/*   Updated: 2026/08/23 19:30:17 by simo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,12 +82,18 @@ struct					s_sim
 
 	int					should_stop;
 
-	t_coder				*coders;
-	pthread_mutex_t		*dongles;
+	t_coder				**coders;
+	t_dongle			**dongles;
 
 	pthread_mutex_t		log_mtx;
 	pthread_mutex_t		state_mtx;
 };
+
+typedef struct s_coder_routine_args
+{
+	t_coder				*coder;
+	t_sim				*sim;
+}						t_coder_routine_args;
 
 /*=== FUNCTION PROTOTYPES ===*/
 
@@ -96,9 +102,9 @@ int						parse_args(int ac, char **av, t_sim *sim);
 
 /*utils.c*/
 long					ft_atol(const char *str);
-long					get_time_ms(void);
+long long				get_time_ms(void);
 void					free_queue(t_queue *q);
-void					print_long(t_sim *sim, int id, char *msg);
+void					print_log(t_sim *sim, int id, char *msg);
 void					ms_to_timespec(struct timespec *ts, long long ms);
 
 /*utils2.c*/
@@ -106,7 +112,7 @@ int						sim_should_stop(t_sim *sim);
 void					sim_request_stop(t_sim *sim);
 
 /*init.c*/
-int						init_sim(t_sim *sim, int id, char *msg);
+int						init_sim(t_sim *sim);
 void					free_sim(t_sim *sim);
 
 /*dongle.c*/
@@ -127,5 +133,9 @@ void					enter_queue(t_queue *q, int coder_id,
 							long long arrival_time, long long deadline);
 void					leave_queue(t_queue *q, int leaving_coder_id);
 int						queue_next(t_queue *q);
+
+/*routine.c*/
+void					*coder_routine(void *arg);
+void					*monitor_routine(void *arg);
 
 #endif
