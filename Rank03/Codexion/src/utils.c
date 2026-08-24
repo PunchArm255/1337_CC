@@ -6,7 +6,7 @@
 /*   By: simo <simo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/22 11:55:36 by mnassiri          #+#    #+#             */
-/*   Updated: 2026/08/23 19:28:11 by simo             ###   ########.fr       */
+/*   Updated: 2026/08/24 23:52:22 by simo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,18 +52,6 @@ void	ms_to_timespec(struct timespec *ts, long long ms)
 		ms = 0;
 	ts->tv_sec = ms / 1000;
 	ts->tv_nsec = (ms % 1000) * 1000000L;
-}
-
-/*CHECK FAILURE CASES FOR THE FUNC BELOW (DATARACE/DEADLOCK)*/
-
-void	print_log(t_sim *sim, int id, char *msg)
-{
-	long	time;
-
-	pthread_mutex_lock(&sim->log_mtx);
-	time = get_time_ms() - sim->start_time;
-	printf("%ld %d %s\n", time, id, msg);
-	pthread_mutex_unlock(&sim->log_mtx);
 }
 
 void	free_queue(t_queue *q)

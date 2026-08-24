@@ -6,7 +6,7 @@
 /*   By: simo <simo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/22 10:51:24 by mnassiri          #+#    #+#             */
-/*   Updated: 2026/08/23 19:30:17 by simo             ###   ########.fr       */
+/*   Updated: 2026/08/24 23:52:27 by simo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,7 +104,6 @@ int						parse_args(int ac, char **av, t_sim *sim);
 long					ft_atol(const char *str);
 long long				get_time_ms(void);
 void					free_queue(t_queue *q);
-void					print_log(t_sim *sim, int id, char *msg);
 void					ms_to_timespec(struct timespec *ts, long long ms);
 
 /*utils2.c*/
