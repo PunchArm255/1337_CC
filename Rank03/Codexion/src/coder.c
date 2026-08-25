@@ -6,7 +6,7 @@
 /*   By: simo <simo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/22 15:41:51 by mnassiri          #+#    #+#             */
-/*   Updated: 2026/08/23 19:31:32 by simo             ###   ########.fr       */
+/*   Updated: 2026/08/26 00:11:47 by simo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,10 +24,31 @@ t_coder	*init_coder(int id, t_dongle *left_dongle, t_dongle *right_dongle)
 	coder->last_compile_start = 0;
 	coder->left_dongle = left_dongle;
 	coder->right_dongle = right_dongle;
+	pthread_mutex_init(&coder->mtx, NULL);
 	return (coder);
 }
 
 void	free_coder(t_coder *coder)
 {
+	if (!coder)
+		return ;
+	pthread_mutex_destroy(&coder->mtx);
 	free(coder);
+}
+
+int	get_coder_compiles(t_coder *c)
+{
+	int	val;
+
+	pthread_mutex_lock(&c->mtx);
+	val = c->times_compiled;
+	pthread_mutex_unlock(&c->mtx);
+	return (val);
+}
+
+void	inc_coder_compiles(t_coder *c)
+{
+	pthread_mutex_lock(&c->mtx);
+	c->times_compiled++;
+	pthread_mutex_unlock(&c->mtx);
 }

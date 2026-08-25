@@ -6,7 +6,7 @@
 /*   By: simo <simo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/22 14:59:13 by mnassiri          #+#    #+#             */
-/*   Updated: 2026/08/23 19:32:33 by simo             ###   ########.fr       */
+/*   Updated: 2026/08/26 00:11:51 by simo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,7 @@ int	init_sim(t_sim *sim)
 	int	i;
 
 	sim->should_stop = 0;
+	sim->start_time = get_time_ms();
 	if (!init_sim_dongles(sim))
 		return (0);
 	if (!init_sim_coders(sim))

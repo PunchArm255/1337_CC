@@ -6,7 +6,7 @@
 /*   By: simo <simo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/22 15:41:44 by mnassiri          #+#    #+#             */
-/*   Updated: 2026/08/24 23:52:24 by simo             ###   ########.fr       */
+/*   Updated: 2026/08/26 00:11:49 by simo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,12 +69,12 @@ int	acquire_dongle(t_dongle *d, int coder_id, long long deadline, t_sim *sim)
 	{
 		leave_queue(d->queue, coder_id);
 		pthread_mutex_unlock(&d->acquire_mtx);
-		return (-1);
+		return (0);
 	}
 	d->is_acquired = 1;
 	leave_queue(d->queue, coder_id);
 	pthread_mutex_unlock(&d->acquire_mtx);
-	return (0);
+	return (1);
 }
 
 void	release_dongle(t_dongle *d, long long cooldown)

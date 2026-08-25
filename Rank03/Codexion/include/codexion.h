@@ -6,7 +6,7 @@
 /*   By: simo <simo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/22 10:51:24 by mnassiri          #+#    #+#             */
-/*   Updated: 2026/08/24 23:52:27 by simo             ###   ########.fr       */
+/*   Updated: 2026/08/26 00:11:45 by simo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,6 +66,8 @@ typedef struct s_coder
 
 	t_dongle			*left_dongle;
 	t_dongle			*right_dongle;
+
+	pthread_mutex_t		mtx;
 }						t_coder;
 
 struct					s_sim
@@ -109,6 +111,8 @@ void					ms_to_timespec(struct timespec *ts, long long ms);
 /*utils2.c*/
 int						sim_should_stop(t_sim *sim);
 void					sim_request_stop(t_sim *sim);
+void					set_coder_ltc(t_coder *c, long long val);
+long long				get_coder_ltc(t_coder *c);
 
 /*init.c*/
 int						init_sim(t_sim *sim);
@@ -125,6 +129,8 @@ void					release_dongle(t_dongle *d, long long cooldown);
 t_coder					*init_coder(int id, t_dongle *left_dongle,
 							t_dongle *right_dongle);
 void					free_coder(t_coder *coder);
+void					inc_coder_compiles(t_coder *c);
+int						get_coder_compiles(t_coder *c);
 
 /*queue.c*/
 t_queue					*init_queue(t_scheduler mode);

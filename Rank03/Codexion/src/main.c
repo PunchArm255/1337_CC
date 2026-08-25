@@ -6,7 +6,7 @@
 /*   By: simo <simo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/22 14:18:07 by mnassiri          #+#    #+#             */
-/*   Updated: 2026/08/23 19:34:57 by simo             ###   ########.fr       */
+/*   Updated: 2026/08/26 00:11:53 by simo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,8 @@ int	main(int ac, char **av)
 	pthread_t				monitor_thread;
 	t_coder_routine_args	*crargs;
 
-	parse_args(ac, av, &sim);
+	if (!parse_args(ac, av, &sim))
+		return (-1);
 	if (!init_sim(&sim))
 	{
 		fprintf(stderr, "[ERROR] Failed to intiialize simulation.\n");
