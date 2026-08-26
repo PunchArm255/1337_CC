@@ -6,7 +6,7 @@
 /*   By: mnassiri <mnassiri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/22 10:51:24 by mnassiri          #+#    #+#             */
-/*   Updated: 2026/08/26 14:39:48 by mnassiri         ###   ########.fr       */
+/*   Updated: 2026/08/26 16:50:47 by mnassiri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,6 +113,7 @@ int						sim_should_stop(t_sim *sim);
 void					sim_request_stop(t_sim *sim);
 void					set_coder_ltc(t_coder *c, long long val);
 long long				get_coder_ltc(t_coder *c);
+void					wake_all_dongles(t_dongle **ds, int num_dongles);
 
 /*init.c*/
 int						init_sim(t_sim *sim);

@@ -6,7 +6,7 @@
 /*   By: mnassiri <mnassiri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/22 14:18:07 by mnassiri          #+#    #+#             */
-/*   Updated: 2026/08/26 14:39:39 by mnassiri         ###   ########.fr       */
+/*   Updated: 2026/08/26 16:50:45 by mnassiri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,5 @@ int	main(int ac, char **av)
 		pthread_join(threads[i++], NULL);
 	pthread_join(monitor_thread, NULL);
 	free_sim(&sim);
-	printf("[SUCCESS] dakchi bonita <3\n");
 	return (0);
 }

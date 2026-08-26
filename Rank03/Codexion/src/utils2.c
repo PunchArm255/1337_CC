@@ -6,7 +6,7 @@
 /*   By: mnassiri <mnassiri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/22 17:03:58 by mnassiri          #+#    #+#             */
-/*   Updated: 2026/08/26 14:39:31 by mnassiri         ###   ########.fr       */
+/*   Updated: 2026/08/26 16:50:43 by mnassiri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,4 +44,14 @@ void	set_coder_ltc(t_coder *c, long long val)
 	pthread_mutex_lock(&c->mtx);
 	c->last_compile_start = val;
 	pthread_mutex_unlock(&c->mtx);
+}
+
+void	wake_all_dongles(t_dongle **ds, int num_dongles)
+{
+	while (num_dongles-- > 0)
+	{
+		pthread_mutex_lock(&ds[num_dongles]->acquire_mtx);
+		pthread_cond_broadcast(&ds[num_dongles]->cond);
+		pthread_mutex_unlock(&ds[num_dongles]->acquire_mtx);
+	}
 }

@@ -1,6 +1,6 @@
 NAME        = codexion
 CC          = cc
-CFLAGS      = -Wall -Wextra -Werror -pthread
+CFLAGS      = -Wall -Wextra -Werror -pthread -O2
 INC         = -I include
 
 SRC_DIR     = src
