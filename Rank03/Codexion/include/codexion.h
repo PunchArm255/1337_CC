@@ -6,7 +6,7 @@
 /*   By: mnassiri <mnassiri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/22 10:51:24 by mnassiri          #+#    #+#             */
-/*   Updated: 2026/08/26 21:36:40 by mnassiri         ###   ########.fr       */
+/*   Updated: 2026/08/26 22:55:38 by mnassiri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@
 typedef enum e_scheduler
 {
 	FIFO,
+	LIFO,
 	EDF
 }						t_scheduler;
 
@@ -72,13 +73,13 @@ typedef struct s_coder
 
 struct					s_sim
 {
-	int					num_coders;
+	long long			num_coders;
 	long long			start_time;
 	long long			time_to_burnout;
 	long long			time_to_compile;
 	long long			time_to_debug;
 	long long			time_to_refactor;
-	int					required_compiles;
+	long long			required_compiles;
 	long long			cooldown;
 	t_scheduler			scheduler;
 
@@ -103,7 +104,7 @@ typedef struct s_coder_routine_args
 int						parse_args(int ac, char **av, t_sim *sim);
 
 /*utils.c*/
-long long				ft_atol(const char *str);
+long long				ft_atoll(const char *str);
 long long				get_time_ms(void);
 void					free_queue(t_queue *q);
 void					ms_to_timespec(struct timespec *ts, long long ms);

@@ -6,7 +6,7 @@
 /*   By: mnassiri <mnassiri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/22 14:18:07 by mnassiri          #+#    #+#             */
-/*   Updated: 2026/08/26 16:50:45 by mnassiri         ###   ########.fr       */
+/*   Updated: 2026/08/26 22:56:08 by mnassiri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 int	main(int ac, char **av)
 {
-	int						i;
+	long long				i;
 	t_sim					sim;
 	pthread_t				*threads;
 	pthread_t				monitor_thread;
@@ -29,12 +29,16 @@ int	main(int ac, char **av)
 	}
 	threads = (pthread_t *)malloc(sizeof(pthread_t) * sim.num_coders);
 	if (!threads)
+	{
+		free_sim(&sim);
 		return (-1);
+	}
 	crargs = (t_coder_routine_args *)malloc(sizeof(t_coder_routine_args)
 			* sim.num_coders);
 	if (!crargs)
 	{
 		free(threads);
+		free_sim(&sim);
 		return (-1);
 	}
 	i = 0;
@@ -49,6 +53,8 @@ int	main(int ac, char **av)
 	while (i < sim.num_coders)
 		pthread_join(threads[i++], NULL);
 	pthread_join(monitor_thread, NULL);
+	free(threads);
+	free(crargs);
 	free_sim(&sim);
 	return (0);
 }

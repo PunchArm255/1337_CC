@@ -6,17 +6,17 @@
 /*   By: mnassiri <mnassiri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/22 11:55:36 by mnassiri          #+#    #+#             */
-/*   Updated: 2026/08/26 14:39:32 by mnassiri         ###   ########.fr       */
+/*   Updated: 2026/08/26 22:49:29 by mnassiri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
 
-long	ft_atol(const char *str)
+long long	ft_atoll(const char *str)
 {
-	int		i;
-	int		sign;
-	long	n;
+	int			i;
+	int			sign;
+	long long	n;
 
 	i = 0;
 	sign = 1;
@@ -24,15 +24,13 @@ long	ft_atol(const char *str)
 	while ((str[i] >= '\t' && str[i] <= '\r') || str[i] == ' ')
 		i++;
 	if (str[i] == '-' || str[i] == '+')
-	{
-		if (str[i] == '-')
-			sign *= -1;
-		i++;
-	}
+		if (str[i++] == '-')
+			sign = -1;
 	while (str[i] >= '0' && str[i] <= '9')
 	{
-		n = n * 10 + (str[i] - '0');
-		i++;
+		if (n > (9223372036854775807LL - (str[i] - '0')) / 10)
+			return (-1); // we're sure the parser will fail since -1 is negative
+		n = n * 10 + (str[i++] - '0');
 	}
 	return (n * sign);
 }

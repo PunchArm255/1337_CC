@@ -6,7 +6,7 @@
 /*   By: mnassiri <mnassiri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/22 16:10:42 by mnassiri          #+#    #+#             */
-/*   Updated: 2026/08/26 14:39:35 by mnassiri         ###   ########.fr       */
+/*   Updated: 2026/08/26 22:22:26 by mnassiri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,12 @@ int	queue_next(t_queue *q)
 		return (q->b.coder_id);
 	if (q->b.coder_id == -1)
 		return (q->a.coder_id);
+	if (q->mode == FIFO)
+	{
+		if (q->a.arrival_time <= q->b.arrival_time)
+			return (q->a.coder_id);
+		return (q->b.coder_id);
+	}
 	if (q->mode == FIFO)
 	{
 		if (q->a.arrival_time <= q->b.arrival_time)
