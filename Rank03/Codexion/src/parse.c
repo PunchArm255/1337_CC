@@ -6,7 +6,7 @@
 /*   By: mnassiri <mnassiri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/22 13:31:36 by mnassiri          #+#    #+#             */
-/*   Updated: 2026/08/26 14:39:36 by mnassiri         ###   ########.fr       */
+/*   Updated: 2026/08/26 21:38:29 by mnassiri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,13 +44,13 @@ static int	validate_all_numbers(char **av)
 
 static void	fill_sim_data(char **av, t_sim *sim)
 {
-	sim->num_coders = ft_atol(av[1]);
-	sim->time_to_burnout = ft_atol(av[2]);
-	sim->time_to_compile = ft_atol(av[3]);
-	sim->time_to_debug = ft_atol(av[4]);
-	sim->time_to_refactor = ft_atol(av[5]);
-	sim->required_compiles = ft_atol(av[6]);
-	sim->cooldown = ft_atol(av[7]);
+	sim->num_coders = ft_atoll(av[1]);
+	sim->time_to_burnout = ft_atoll(av[2]);
+	sim->time_to_compile = ft_atoll(av[3]);
+	sim->time_to_debug = ft_atoll(av[4]);
+	sim->time_to_refactor = ft_atoll(av[5]);
+	sim->required_compiles = ft_atoll(av[6]);
+	sim->cooldown = ft_atoll(av[7]);
 	sim->should_stop = 0;
 }
 
