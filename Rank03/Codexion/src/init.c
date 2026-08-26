@@ -6,7 +6,7 @@
 /*   By: mnassiri <mnassiri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/22 14:59:13 by mnassiri          #+#    #+#             */
-/*   Updated: 2026/08/26 14:39:40 by mnassiri         ###   ########.fr       */
+/*   Updated: 2026/08/26 21:44:33 by mnassiri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ static int	init_sim_dongles(t_sim *sim)
 			j = 0;
 			while (j < i)
 				free_dongle(sim->dongles[j++]);
+			free(sim->dongles);
 			return (0);
 		}
 		i++;
@@ -44,8 +45,8 @@ static int	init_sim_coders(t_sim *sim)
 	sim->coders = (t_coder **)malloc(sizeof(t_coder *) * sim->num_coders);
 	if (!sim->coders)
 		return (0);
-	i = 0;
-	while (i < sim->num_coders)
+	i = sim->num_coders;
+	while (i-- > 0)
 	{
 		sim->coders[i] = init_coder(i, sim->dongles[i], sim->dongles[(i + 1)
 				% sim->num_coders]);
@@ -54,12 +55,13 @@ static int	init_sim_coders(t_sim *sim)
 			j = 0;
 			while (j < i)
 				free_coder(sim->coders[j++]);
+			free(sim->coders);
 			j = 0;
 			while (j < sim->num_coders)
 				free_dongle(sim->dongles[j++]);
+			free(sim->coders);
 			return (0);
 		}
-		i++;
 	}
 	return (1);
 }
