@@ -6,7 +6,7 @@
 /*   By: mnassiri <mnassiri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/22 10:51:24 by mnassiri          #+#    #+#             */
-/*   Updated: 2026/08/26 16:50:47 by mnassiri         ###   ########.fr       */
+/*   Updated: 2026/08/26 21:36:40 by mnassiri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ typedef struct s_coder
 {
 	int					id;
 	int					times_compiled;
-	long				last_compile_start;
+	long long			last_compile_start;
 
 	t_dongle			*left_dongle;
 	t_dongle			*right_dongle;
@@ -73,13 +73,13 @@ typedef struct s_coder
 struct					s_sim
 {
 	int					num_coders;
-	long				start_time;
-	long				time_to_burnout;
-	long				time_to_compile;
-	long				time_to_debug;
-	long				time_to_refactor;
+	long long			start_time;
+	long long			time_to_burnout;
+	long long			time_to_compile;
+	long long			time_to_debug;
+	long long			time_to_refactor;
 	int					required_compiles;
-	long				cooldown;
+	long long			cooldown;
 	t_scheduler			scheduler;
 
 	int					should_stop;
@@ -103,7 +103,7 @@ typedef struct s_coder_routine_args
 int						parse_args(int ac, char **av, t_sim *sim);
 
 /*utils.c*/
-long					ft_atol(const char *str);
+long long				ft_atol(const char *str);
 long long				get_time_ms(void);
 void					free_queue(t_queue *q);
 void					ms_to_timespec(struct timespec *ts, long long ms);
