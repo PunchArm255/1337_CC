@@ -6,7 +6,7 @@
 /*   By: mnassiri <mnassiri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/22 15:41:44 by mnassiri          #+#    #+#             */
-/*   Updated: 2026/08/26 14:39:41 by mnassiri         ###   ########.fr       */
+/*   Updated: 2026/08/26 21:41:00 by mnassiri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,9 @@ t_dongle	*init_dongle(t_scheduler mode)
 
 void	free_dongle(t_dongle *dongle)
 {
+	if (!dongle)
+		return ;
+	free_queue(dongle->queue);
 	pthread_mutex_destroy(&dongle->acquire_mtx);
 	pthread_cond_destroy(&dongle->cond);
 	free(dongle);
