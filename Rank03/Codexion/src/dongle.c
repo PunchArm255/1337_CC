@@ -6,7 +6,7 @@
 /*   By: mnassiri <mnassiri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/22 15:41:44 by mnassiri          #+#    #+#             */
-/*   Updated: 2026/08/26 21:41:00 by mnassiri         ###   ########.fr       */
+/*   Updated: 2026/08/28 20:21:44 by mnassiri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,8 +27,19 @@ t_dongle	*init_dongle(t_scheduler mode)
 	}
 	dongle->is_acquired = 0;
 	dongle->time_to_acquire = 0;
-	pthread_mutex_init(&dongle->acquire_mtx, NULL);
-	pthread_cond_init(&dongle->cond, NULL);
+	if (!pthread_mutex_init(&dongle->acquire_mtx, NULL))
+	{
+		free_queue(dongle->queue);
+		free(dongle);
+		return (NULL);
+	}
+	if (!pthread_cond_init(&dongle->cond, NULL))
+	{
+		free_queue(dongle->queue);
+		pthread_cond_destroy(&dongle->cond);
+		free(dongle);
+		return (NULL);
+	}
 	return (dongle);
 }
 

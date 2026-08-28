@@ -6,7 +6,7 @@
 /*   By: mnassiri <mnassiri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/22 11:55:36 by mnassiri          #+#    #+#             */
-/*   Updated: 2026/08/26 22:49:29 by mnassiri         ###   ########.fr       */
+/*   Updated: 2026/08/28 22:16:08 by mnassiri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ long long	ft_atoll(const char *str)
 	while (str[i] >= '0' && str[i] <= '9')
 	{
 		if (n > (9223372036854775807LL - (str[i] - '0')) / 10)
-			return (-1); // we're sure the parser will fail since -1 is negative
+			return (-1);
 		n = n * 10 + (str[i++] - '0');
 	}
 	return (n * sign);

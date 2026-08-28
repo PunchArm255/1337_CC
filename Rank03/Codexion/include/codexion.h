@@ -6,12 +6,13 @@
 /*   By: mnassiri <mnassiri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/22 10:51:24 by mnassiri          #+#    #+#             */
-/*   Updated: 2026/08/26 22:55:38 by mnassiri         ###   ########.fr       */
+/*   Updated: 2026/08/28 22:57:36 by mnassiri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CODEXION_H
 # define CODEXION_H
+# define MONITOR_FRAME_BUDGET 5
 
 # include <pthread.h>
 # include <stdio.h>
@@ -25,7 +26,6 @@
 typedef enum e_scheduler
 {
 	FIFO,
-	LIFO,
 	EDF
 }						t_scheduler;
 

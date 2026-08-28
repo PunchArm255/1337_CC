@@ -6,7 +6,7 @@
 /*   By: mnassiri <mnassiri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/22 15:41:51 by mnassiri          #+#    #+#             */
-/*   Updated: 2026/08/26 21:30:53 by mnassiri         ###   ########.fr       */
+/*   Updated: 2026/08/28 20:22:08 by mnassiri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,11 @@ t_coder	*init_coder(int id, t_dongle *left_dongle, t_dongle *right_dongle)
 	coder->last_compile_start = get_time_ms();
 	coder->left_dongle = left_dongle;
 	coder->right_dongle = right_dongle;
-	pthread_mutex_init(&coder->mtx, NULL);
+	if (!pthread_mutex_init(&coder->mtx, NULL))
+	{
+		free(coder);
+		return (NULL);
+	}
 	return (coder);
 }
 

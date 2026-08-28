@@ -6,7 +6,7 @@
 /*   By: mnassiri <mnassiri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/23 18:56:54 by simo              #+#    #+#             */
-/*   Updated: 2026/08/26 23:03:09 by mnassiri         ###   ########.fr       */
+/*   Updated: 2026/08/28 22:50:24 by mnassiri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,17 @@ static void	dongle_reorder(t_coder *c, t_dongle **left, t_dongle **right)
 	{
 		*left = c->left_dongle;
 		*right = c->right_dongle;
+	}
+}
+
+static void	precise_sleep(long long start_ms)
+{
+	long long	remaining_time;
+
+	remaining_time = MONITOR_FRAME_BUDGET - (get_time_ms() - start_ms);
+	if (remaining_time > 0)
+	{
+		usleep(remaining_time * 1000);
 	}
 }
 
@@ -79,7 +90,6 @@ void	*monitor_routine(void *arg)
 	int			all_coders_done;
 	long long	deadline;
 	long long	start_ms;
-	long long	remaining_time;
 	t_sim		*sim;
 
 	sim = (t_sim *)arg;
@@ -108,11 +118,7 @@ void	*monitor_routine(void *arg)
 			wake_all_dongles(sim->dongles, sim->num_coders);
 			return (NULL);
 		}
-		remaining_time = 5 - (get_time_ms() - start_ms);
-		if (remaining_time > 0)
-		{
-			usleep(remaining_time * 1000);
-		}
+		precise_sleep(start_ms);
 	}
 	return (NULL);
 }

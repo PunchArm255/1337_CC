@@ -6,11 +6,36 @@
 /*   By: mnassiri <mnassiri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/22 14:18:07 by mnassiri          #+#    #+#             */
-/*   Updated: 2026/08/26 22:56:08 by mnassiri         ###   ########.fr       */
+/*   Updated: 2026/08/28 22:30:09 by mnassiri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
+
+static int	initial_setup(pthread_t *threads, t_sim *sim,
+		t_coder_routine_args *crargs)
+{
+	if (!init_sim(&sim))
+	{
+		fprintf(stderr, "[ERROR] Failed to intiialize simulation.\n");
+		return (0);
+	}
+	threads = (pthread_t *)malloc(sizeof(pthread_t) * sim->num_coders);
+	if (!threads)
+	{
+		free_sim(&sim);
+		return (0);
+	}
+	crargs = (t_coder_routine_args *)malloc(sizeof(t_coder_routine_args)
+			* sim->num_coders);
+	if (!crargs)
+	{
+		free(threads);
+		free_sim(&sim);
+		return (0);
+	}
+	return (1);
+}
 
 int	main(int ac, char **av)
 {
