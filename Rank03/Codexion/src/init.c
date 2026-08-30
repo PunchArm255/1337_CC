@@ -6,7 +6,7 @@
 /*   By: mnassiri <mnassiri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/22 14:59:13 by mnassiri          #+#    #+#             */
-/*   Updated: 2026/08/26 23:02:07 by mnassiri         ###   ########.fr       */
+/*   Updated: 2026/08/30 16:47:08 by mnassiri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,10 @@ int	init_sim(t_sim *sim)
 {
 	long long	i;
 
-	sim->should_stop = 0;
+	if (sim->required_compiles == 0)
+		sim->should_stop = 1;
+	else
+		sim->should_stop = 0;
 	sim->start_time = get_time_ms();
 	if (!init_sim_dongles(sim))
 		return (0);
@@ -79,12 +82,11 @@ int	init_sim(t_sim *sim)
 	if (pthread_mutex_init(&sim->log_mtx, NULL) != 0
 		|| pthread_mutex_init(&sim->state_mtx, NULL) != 0)
 	{
-		i = 0;
-		while (i < sim->num_coders)
+		i = -1;
+		while (++i < sim->num_coders)
 		{
 			free_coder(sim->coders[i]);
 			free_dongle(sim->dongles[i]);
-			i++;
 		}
 		free(sim->coders);
 		free(sim->dongles);

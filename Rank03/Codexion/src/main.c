@@ -6,7 +6,7 @@
 /*   By: mnassiri <mnassiri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/22 14:18:07 by mnassiri          #+#    #+#             */
-/*   Updated: 2026/08/28 22:30:09 by mnassiri         ###   ########.fr       */
+/*   Updated: 2026/08/30 13:05:25 by mnassiri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,8 +36,8 @@ static void	start_threads(t_sim *sim, pthread_t *threads,
 	i = 0;
 	while (i < sim->num_coders)
 	{
-		crargs[i] = (t_coder_routine_args){.coder = sim->coders[i],
-			.sim = sim};
+		crargs[i].coder = sim->coders[i];
+		crargs[i].sim = sim;
 		pthread_create(&threads[i], NULL, coder_routine, &crargs[i]);
 		i++;
 	}

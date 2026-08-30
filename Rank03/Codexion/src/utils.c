@@ -6,7 +6,7 @@
 /*   By: mnassiri <mnassiri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/22 11:55:36 by mnassiri          #+#    #+#             */
-/*   Updated: 2026/08/30 00:48:27 by mnassiri         ###   ########.fr       */
+/*   Updated: 2026/08/30 16:40:34 by mnassiri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,13 +24,17 @@ long long	ft_atoll(const char *str)
 	while ((str[i] >= '\t' && str[i] <= '\r') || str[i] == ' ')
 		i++;
 	if (str[i] == '-' || str[i] == '+')
-		if (str[i++] == '-')
+	{
+		if (str[i] == '-')
 			sign = -1;
+		i++;
+	}
 	while (str[i] >= '0' && str[i] <= '9')
 	{
 		if (n > (9223372036854775807LL - (str[i] - '0')) / 10)
 			return (-1);
-		n = n * 10 + (str[i++] - '0');
+		n = (n * 10) + (str[i] - '0');
+		i++;
 	}
 	return (n * sign);
 }

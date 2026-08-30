@@ -6,7 +6,7 @@
 /*   By: mnassiri <mnassiri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/22 13:31:36 by mnassiri          #+#    #+#             */
-/*   Updated: 2026/08/28 10:44:59 by mnassiri         ###   ########.fr       */
+/*   Updated: 2026/08/30 16:52:19 by mnassiri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,16 +15,25 @@
 static int	is_valid_number(const char *str)
 {
 	int	i;
+	int	has_digits;
 
 	i = 0;
+	has_digits = 0;
 	if (!str || !str[0])
 		return (0);
-	while (str[i])
+	while ((str[i] >= '\t' && str[i] <= '\r') || str[i] == ' ')
+		i++;
+	if (str[i] == '+')
+		i++;
+	while (str[i] >= '0' && str[i] <= '9')
 	{
-		if (str[i] < '0' || str[i] > '9')
-			return (0);
+		has_digits = 1;
 		i++;
 	}
+	while ((str[i] >= '\t' && str[i] <= '\r') || str[i] == ' ')
+		i++;
+	if (!has_digits || str[i] != '\0')
+		return (0);
 	return (1);
 }
 
