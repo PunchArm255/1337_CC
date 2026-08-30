@@ -24,7 +24,7 @@ t_coder	*init_coder(int id, t_dongle *left_dongle, t_dongle *right_dongle)
 	coder->last_compile_start = get_time_ms();
 	coder->left_dongle = left_dongle;
 	coder->right_dongle = right_dongle;
-	if (!pthread_mutex_init(&coder->mtx, NULL))
+	if (pthread_mutex_init(&coder->mtx, NULL) != 0)
 	{
 		free(coder);
 		return (NULL);

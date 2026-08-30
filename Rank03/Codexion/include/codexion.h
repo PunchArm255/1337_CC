@@ -123,6 +123,8 @@ void					free_sim(t_sim *sim);
 /*dongle.c*/
 t_dongle				*init_dongle(t_scheduler mode);
 void					free_dongle(t_dongle *dongle);
+
+/*dongle2.c*/
 int						acquire_dongle(t_dongle *d, int coder_id,
 							long long deadline, t_sim *sim);
 void					release_dongle(t_dongle *d, long long cooldown);
@@ -142,7 +144,10 @@ void					leave_queue(t_queue *q, int leaving_coder_id);
 int						queue_next(t_queue *q);
 
 /*routine.c*/
+void					sim_log(t_sim *sim, t_coder *coder, const char *msg);
 void					*coder_routine(void *arg);
+
+/*monitor.c*/
 void					*monitor_routine(void *arg);
 
 #endif
