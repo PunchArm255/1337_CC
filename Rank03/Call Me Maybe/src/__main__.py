@@ -53,13 +53,13 @@ def main() -> None:
     # Gracefully validate and load input files
     functions = load_functions_definition(config.functions_path)
     if not functions:
-        print("Error: No valid function definitions loaded. Aborting.",
+        print("[ERROR] No valid function definitions loaded. Aborting.",
               file=sys.stderr)
         sys.exit(1)
 
     test_cases = load_test_cases(config.input_path)
     if not test_cases:
-        print("Error: No valid test prompts loaded. Aborting.",
+        print("[ERROR] No valid test prompts loaded. Aborting.",
               file=sys.stderr)
         sys.exit(1)
 
@@ -68,8 +68,8 @@ def main() -> None:
 
     try:
         engine = ConstrainedEngine()
-    except Exception as err:
-        print(f"Error initializing LLM SDK: {err}", file=sys.stderr)
+    except Exception as e:
+        print(f"[ERROR] Initializing LLM SDK: {e}", file=sys.stderr)
         sys.exit(1)
 
     results: list[FunctionCallResult] = []
@@ -81,8 +81,8 @@ def main() -> None:
             print(f"[{idx}/{len(test_cases)}] "
                   f"Prompt: '{test.prompt}' -> Call: {call_result.name}"
                   f"({call_result.parameters})")
-        except Exception as err:
-            print(f"Error processing prompt '{test.prompt}': {err}",
+        except Exception as e:
+            print(f"[ERROR] Processing prompt '{test.prompt}': {e}",
                   file=sys.stderr)
 
     # Ensure output directory exists
@@ -93,11 +93,15 @@ def main() -> None:
         with open(config.output_path, "w", encoding="utf-8") as f:
             json.dump(output_data, f, indent=2)
         print(f"\nSuccess! Results written to {config.output_path}")
-    except Exception as err:
-        print(f"Error writing output file {config.output_path}: {err}",
+    except Exception as e:
+        print(f"[ERROR] Writing output file {config.output_path}: {e}",
               file=sys.stderr)
         sys.exit(1)
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("--- Generation Interrupted ---")
+        sys.exit(1)

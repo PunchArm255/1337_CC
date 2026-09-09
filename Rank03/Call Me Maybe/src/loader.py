@@ -18,7 +18,7 @@ def load_functions_definition(path: str) -> list[FunctionDefinition]:
         List of validated FunctionDefinition models.
     """
     if not os.path.exists(path):
-        print(f"Error: Functions definition file not found: {path}",
+        print(f"[ERROR] Functions definition file not found: {path}",
               file=sys.stderr)
         return []
 
@@ -27,20 +27,20 @@ def load_functions_definition(path: str) -> list[FunctionDefinition]:
             raw_data = json.load(f)
 
         if not isinstance(raw_data, list):
-            print(f"Error: Expected a JSON array in {path}", file=sys.stderr)
+            print(f"[ERROR] Expected a JSON array in {path}", file=sys.stderr)
             return []
 
         return [FunctionDefinition.model_validate(item) for item in raw_data]
 
-    except json.JSONDecodeError as err:
-        print(f"Error: Invalid JSON format in {path}: {err}", file=sys.stderr)
+    except json.JSONDecodeError as e:
+        print(f"[ERROR] Invalid JSON format in {path}: {e}", file=sys.stderr)
         return []
-    except ValidationError as err:
-        print(f"Error: Schema validation failed for {path}: {err}",
+    except ValidationError as e:
+        print(f"[ERROR] Schema validation failed for {path}: {e}",
               file=sys.stderr)
         return []
-    except Exception as err:
-        print(f"Error reading {path}: {err}", file=sys.stderr)
+    except Exception as e:
+        print(f"[ERROR] Reading {path}: {e}", file=sys.stderr)
         return []
 
 
@@ -54,7 +54,7 @@ def load_test_cases(path: str) -> list[TestCase]:
         List of validated TestCase models.
     """
     if not os.path.exists(path):
-        print(f"Error: Input tests file not found: {path}", file=sys.stderr)
+        print(f"[ERROR] Input tests file not found: {path}", file=sys.stderr)
         return []
 
     try:
@@ -62,18 +62,18 @@ def load_test_cases(path: str) -> list[TestCase]:
             raw_data = json.load(f)
 
         if not isinstance(raw_data, list):
-            print(f"Error: Expected a JSON array in {path}", file=sys.stderr)
+            print(f"[ERROR] Expected a JSON array in {path}", file=sys.stderr)
             return []
 
         return [TestCase.model_validate(item) for item in raw_data]
 
-    except json.JSONDecodeError as err:
-        print(f"Error: Invalid JSON format in {path}: {err}", file=sys.stderr)
+    except json.JSONDecodeError as e:
+        print(f"[ERROR] Invalid JSON format in {path}: {e}", file=sys.stderr)
         return []
-    except ValidationError as err:
-        print(f"Error: Schema validation failed for {path}: {err}",
+    except ValidationError as e:
+        print(f"[ERROR] Schema validation failed for {path}: {e}",
               file=sys.stderr)
         return []
-    except Exception as err:
-        print(f"Error reading {path}: {err}", file=sys.stderr)
+    except Exception as e:
+        print(f"[ERROR] Reading {path}: {e}", file=sys.stderr)
         return []

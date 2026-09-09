@@ -1,284 +1,339 @@
 """Constrained decoding engine for structured LLM function calling."""
 
+from functools import lru_cache
 import json
-import os
-import re
+import sys
 from typing import Any
+
 import numpy as np
 
-from llm_sdk import Small_LLM_Model
-from src.models import FunctionDefinition, FunctionCallResult
+from llm_sdk import Small_LLM_Model  # type: ignore[attr-defined]
+from src.models import FunctionCallResult, FunctionDefinition
+
+# Qwen special token IDs
+STOP_IDS = {151643, 151645}
+FORBIDDEN_IDS = {151644, 151645}
 
 
 class ConstrainedEngine:
     """Engine executing schema-constrained decoding over Small_LLM_Model."""
 
     def __init__(self, model_name: str = "Qwen/Qwen3-0.6B") -> None:
-        """Initialize LLM and build token lookup tables.
+        """Initialize the LLM wrapper model.
 
         Args:
-            model_name: Hugging Face model repository identifier.
+            model_name: HuggingFace model identifier.
         """
         self._model = Small_LLM_Model(model_name=model_name)
-        self._vocab_list: list[str] = []
-        self._build_vocab_cache()
 
-    def _build_vocab_cache(self) -> None:
-        """Load and cache the vocabulary token string representations."""
+    @lru_cache(maxsize=160000)
+    def _decode_token(self, token_id: int) -> str:
+        """Decode a single token ID to text (cached)."""
+        text = str(self._model.decode([token_id]))
+        return text.replace("\u0120", " ").replace("Ġ", " ")
+
+    def _choose_function(
+        self,
+        prompt: str,
+        functions: list[FunctionDefinition],
+    ) -> str:
+        """Select a function name via constrained decoding.
+
+        Masks logits so only tokens forming valid function names
+        (or 'fn_not_found') can be generated.
+
+        Args:
+            prompt: User natural language prompt.
+            functions: Available function definitions.
+
+        Returns:
+            Selected function name, or 'fn_not_found'.
+        """
+        candidates = [f.name for f in functions] + ["fn_not_found"]
+
+        func_list = "\n".join(
+            f"- {f.name}: {f.description}" for f in functions
+        )
+        sys_msg = (
+            "You are a function calling system. Select the single best "
+            "function from the available functions that directly solves "
+            "the user request.\nIf the user request is a general "
+            "question, conversational query, or cannot be performed by "
+            "any listed function, you must select fn_not_found."
+        )
+        not_found = (
+            "- fn_not_found: Use this when the request cannot be "
+            "answered by any of the available functions above "
+            "(e.g. general knowledge questions, facts, jokes)."
+        )
+        full_prompt = (
+            f"<|im_start|>system\n{sys_msg}<|im_end|>\n"
+            f"<|im_start|>user\n"
+            f"Available functions:\n{func_list}\n"
+            f"{not_found}\n\n"
+            f"User request: {prompt}<|im_end|>\n"
+            f"<|im_start|>assistant\nFunction: "
+        )
+
+        ids = self._model.encode(full_prompt)[0].tolist()
+        built = ""
+
+        # pre-collect token IDs that appear in any candidate name
+        allowed_ids: set[int] = set()
+        for name in candidates:
+            for variant in (name, " " + name):
+                allowed_ids.update(
+                    self._model.encode(variant)[0].tolist()
+                )
+
+        for _ in range(15):
+            if built in candidates:
+                return built
+
+            remaining = [c for c in candidates if c.startswith(built)]
+            if not remaining:
+                break
+
+            logits = np.array(
+                self._model.get_logits_from_input_ids(ids),
+                dtype=np.float32,
+            )
+            mask = np.zeros(len(logits), dtype=bool)
+
+            for tid in allowed_ids:
+                if tid >= len(logits):
+                    continue
+                extended = built + self._decode_token(tid)
+                if any(
+                    c.startswith(extended) or extended.startswith(c)
+                    for c in remaining
+                ):
+                    mask[tid] = True
+
+            if not mask.any():
+                break
+
+            logits[~mask] = -np.inf
+            token = int(np.argmax(logits))
+            ids.append(token)
+            built += self._decode_token(token)
+
+        # return first candidate that starts with built
+        for name in candidates:
+            if name.startswith(built):
+                return name
+        return "fn_not_found"
+
+    def _extract_parameters(
+        self,
+        prompt: str,
+        func: FunctionDefinition,
+    ) -> dict[str, Any]:
+        """Extract typed parameters using constrained JSON generation.
+
+        Args:
+            prompt: User natural language prompt.
+            func: Schema definition of the selected function.
+
+        Returns:
+            Dictionary of parameter names mapped to typed values.
+        """
+        if not func.parameters:
+            return {}
+
+        keys = list(func.parameters.keys())
+        schema = ", ".join(
+            f'"{k}" ({v.type})' for k, v in func.parameters.items()
+        )
+        rules = (
+            "Rules:\n"
+            "- Extract exact raw input values from the user request.\n"
+            "- Do NOT solve, compute, or execute the function.\n"
+            f"- Output JSON with exact keys: {json.dumps(keys)}\n"
+            "- Numbers must be numeric digits (e.g. 16.0), never "
+            "words.\n"
+            "- Do not duplicate numbers (e.g. write 345, not 345345).\n"
+            "- For 'asterisks', use '*'.\n"
+            "- No prose or markdown."
+        )
+        full_prompt = (
+            f"<|im_start|>system\n"
+            f"You are a parameter extractor for {func.name}.\n"
+            f"Extract values for parameters: {schema}.\n"
+            f"{rules}<|im_end|>\n"
+            f"<|im_start|>user\n{prompt}<|im_end|>\n"
+            f"<|im_start|>assistant\n<think>\n\n</think>\n{{"
+        )
+
+        ids = self._model.encode(full_prompt)[0].tolist()
+        parts = ["{"]
+        in_str = False
+        esc = False
+
+        for _ in range(80):
+            logits = np.array(
+                self._model.get_logits_from_input_ids(ids),
+                dtype=np.float32,
+            )
+            for tid in FORBIDDEN_IDS:
+                if tid < len(logits):
+                    logits[tid] = -np.inf
+
+            token = int(np.argmax(logits))
+            if token in STOP_IDS:
+                break
+
+            text = self._decode_token(token)
+            if "<|im_end|>" in text:
+                break
+
+            ids.append(token)
+            parts.append(text)
+
+            for ch in text:
+                if ch == "\\" and not esc:
+                    esc = True
+                    continue
+                if ch == '"' and not esc:
+                    in_str = not in_str
+                esc = False
+
+            if not in_str and "}" in text:
+                break
+
+        raw = "".join(parts)
+        parsed = self._parse_json(raw, func)
+        return self._apply_types(parsed, func, prompt)
+
+    def _parse_json(
+        self,
+        raw: str,
+        func: FunctionDefinition,
+    ) -> dict[str, Any]:
+        """Parse raw JSON with a single-param fallback.
+
+        Args:
+            raw: Raw JSON string from generation.
+            func: Function schema for parameter names.
+
+        Returns:
+            Parsed parameter dictionary (untyped).
+        """
         try:
-            vocab_path = self._model.get_path_to_vocab_file()
-            if os.path.exists(vocab_path):
-                with open(vocab_path, "r", encoding="utf-8") as f:
-                    vocab_dict: dict[str, int] = json.load(f)
-
-                max_id = max(vocab_dict.values())
-                self._vocab_list = [""] * (max_id + 1)
-                for token_str, token_id in vocab_dict.items():
-                    clean_str = token_str.replace("\u0120", " ").replace(
-                        "Ġ", " "
-                    )
-                    self._vocab_list[token_id] = clean_str
-                return
+            loaded = json.loads(raw)
+            if isinstance(loaded, dict):
+                return loaded
         except Exception:
             pass
 
-        self._vocab_list = [""] * 152000
+        # fallback, extract single string value if JSON broke
+        if len(func.parameters) == 1 and ":" in raw:
+            key = list(func.parameters.keys())[0]
+            val = raw.split(":", 1)[1].strip().rstrip("}\n ")
+            if (
+                (val.startswith('"') and val.endswith('"'))
+                or (val.startswith("'") and val.endswith("'"))
+            ):
+                val = val[1:-1]
+            if val:
+                return {key: val}
 
-    def _get_token_str(self, token_id: int) -> str:
-        """Retrieve token string with on-demand fallback decoding."""
-        if token_id < len(self._vocab_list) and self._vocab_list[token_id]:
-            return self._vocab_list[token_id]
-        decoded = self._model.decode([token_id])
-        if token_id < len(self._vocab_list):
-            self._vocab_list[token_id] = decoded
-        return decoded
+        return {}
 
-    def _sample_constrained(
+    def _apply_types(
         self,
-        input_ids: list[int],
-        valid_candidates: list[str],
-        max_tokens: int = 15,
-    ) -> str:
-        """Generate tokens while masking logits breaking candidate prefixes.
+        parsed: dict[str, Any],
+        func: FunctionDefinition,
+        prompt: str,
+    ) -> dict[str, Any]:
+        """Cast parsed values to their schema-defined types.
 
         Args:
-            input_ids: Sequence of input token IDs.
-            valid_candidates: Candidate target strings to constrain towards.
-            max_tokens: Maximum number of tokens to generate.
+            parsed: Untyped parameter dictionary.
+            func: Function schema with type info.
+            prompt: Original prompt (used for template fallback).
 
         Returns:
-            The matched candidate string.
+            Dictionary with correctly typed parameter values.
         """
-        curr_ids = list(input_ids)
-        generated = ""
-
-        # Pre-identify candidate token IDs that could match any candidate
-        relevant_token_ids: list[tuple[int, str]] = []
-        for t_id in range(min(len(self._vocab_list), 152000)):
-            t_str = self._get_token_str(t_id)
-            if not t_str:
-                continue
-            for cand in valid_candidates:
-                if t_str in cand or cand.startswith(t_str):
-                    relevant_token_ids.append((t_id, t_str))
-                    break
-
-        for _ in range(max_tokens):
-            if generated in valid_candidates:
-                return generated
-
-            logits = self._model.get_logits_from_input_ids(curr_ids)
-            logits_np = np.array(logits, dtype=np.float32)
-
-            active_targets = [
-                c for c in valid_candidates if c.startswith(generated)
-            ]
-            if not active_targets:
-                break
-
-            mask = np.zeros(len(logits_np), dtype=bool)
-            has_valid = False
-
-            for t_id, t_str in relevant_token_ids:
-                if t_id >= len(logits_np):
-                    continue
-                next_cand = generated + t_str
-                if any(
-                    target.startswith(next_cand) or next_cand.startswith(target)
-                    for target in active_targets
-                ):
-                    mask[t_id] = True
-                    has_valid = True
-
-            if not has_valid:
-                break
-
-            logits_np[~mask] = -np.inf
-            chosen_id = int(np.argmax(logits_np))
-            token_str = self._get_token_str(chosen_id)
-
-            curr_ids.append(chosen_id)
-            generated += token_str
-
-            if generated in valid_candidates:
-                return generated
-
-        return generated
-
-    def _extract_number(self, prompt: str, param_name: str) -> float:
-        """Extract a numeric parameter value using constrained digit tokens.
-
-        Args:
-            prompt: Original natural language user prompt.
-            param_name: Name of the parameter being extracted.
-
-        Returns:
-            Extracted floating point value.
-        """
-        numbers = re.findall(r"[-+]?\d*\.?\d+", prompt)
-        if numbers:
-            if param_name in ["b", "y", "second", "num2"] and len(numbers) > 1:
-                try:
-                    return float(numbers[1])
-                except ValueError:
-                    pass
-            try:
-                return float(numbers[0])
-            except ValueError:
-                pass
-
-        sub_prompt = (
-            f"User: {prompt}\n"
-            f"Extract number for parameter '{param_name}': "
+        result: dict[str, Any] = {}
+        # when only one param and one value, allow key mismatch
+        fallback = (
+            list(parsed.values())[0]
+            if len(parsed) == 1 else None
         )
-        input_tensor = self._model.encode(sub_prompt)
-        input_ids: list[int] = input_tensor[0].tolist()
 
-        allowed_chars = set("0123456789.-+ ")
-        gen_str = ""
+        for name, prop in func.parameters.items():
+            val = parsed.get(
+                name,
+                fallback if len(func.parameters) == 1 else None,
+            )
 
-        for _ in range(8):
-            logits = self._model.get_logits_from_input_ids(input_ids)
-            logits_np = np.array(logits, dtype=np.float32)
+            if (val is None or val == "") and "template:" in prompt.lower():
+                val = prompt.split("template:", 1)[1].strip()
 
-            mask = np.zeros(len(logits_np), dtype=bool)
-            for token_id in range(min(len(logits_np), 50000)):
-                t_str = self._get_token_str(token_id)
-                if t_str and all(c in allowed_chars for c in t_str):
-                    mask[token_id] = True
+            if prop.type in ("integer", "int"):
+                try:
+                    val_f = float(val)  # type: ignore[arg-type]
+                    result[name] = int(round(val_f))
+                except (ValueError, TypeError):
+                    result[name] = 0
 
-            if not np.any(mask):
-                break
+            elif prop.type in ("number", "float"):
+                if isinstance(val, (int, float, str)):
+                    s = str(val).split(".")[0]
+                    h = len(s) // 2
+                    if len(s) >= 4 and len(s) % 2 == 0:
+                        if s[:h] == s[h:] and s[:h] in prompt:
+                            val = s[:h]
+                try:
+                    num = float(val) if val is not None else 0.0
+                    if isinstance(val, int) and not isinstance(
+                        val, bool
+                    ):
+                        result[name] = int(val)
+                    elif num.is_integer() and isinstance(val, int):
+                        result[name] = int(num)
+                    else:
+                        result[name] = num
+                except (ValueError, TypeError):
+                    result[name] = 0.0
 
-            logits_np[~mask] = -np.inf
-            chosen_id = int(np.argmax(logits_np))
-            t_str = self._get_token_str(chosen_id)
+            elif prop.type == "boolean":
+                result[name] = bool(val)
+            else:
+                result[name] = str(val) if val is not None else ""
 
-            if "\n" in t_str or not t_str.strip():
-                if gen_str.strip():
-                    break
-
-            input_ids.append(chosen_id)
-            gen_str += t_str
-
-        try:
-            return float(gen_str.strip())
-        except ValueError:
-            return 0.0
-
-    def _extract_string(self, prompt: str, param_name: str) -> str:
-        """Extract a string parameter value from the prompt.
-
-        Args:
-            prompt: Original natural language user prompt.
-            param_name: Name of the parameter being extracted.
-
-        Returns:
-            Extracted string value.
-        """
-        quoted = re.findall(r"['\"]([^'\"]*)['\"]", prompt)
-        if quoted:
-            return quoted[0]
-
-        for keyword in ["greet", "echo", "say", "reverse"]:
-            if keyword in prompt.lower():
-                parts = re.split(rf"\b{keyword}\b", prompt, flags=re.IGNORECASE)
-                if len(parts) > 1 and parts[1].strip():
-                    return parts[1].strip(" .?!'\"")
-
-        return prompt.strip()
+        return result
 
     def process_prompt(
         self,
         prompt: str,
         functions: list[FunctionDefinition],
     ) -> FunctionCallResult:
-        """Translate a user prompt into a structured function call result.
+        """Translate a user prompt into a structured function call.
 
         Args:
             prompt: User natural language prompt.
             functions: List of available function definitions.
 
         Returns:
-            Validated FunctionCallResult model.
+            Validated FunctionCallResult model instance.
         """
-        func_names = [f.name for f in functions]
-        if not func_names:
+        name = self._choose_function(prompt, functions)
+
+        if name == "fn_not_found":
+            print(
+                f"[WARNING] No matching function found for: '{prompt}'",
+                file=sys.stderr,
+            )
             return FunctionCallResult(
-                prompt=prompt, name="unknown", parameters={}
+                prompt=prompt, name="fn_not_found", parameters={},
             )
 
-        func_descriptions = "\n".join(
-            [f"- {f.name}: {f.description}" for f in functions]
-        )
-        meta_prompt = (
-            f"Available functions:\n{func_descriptions}\n\n"
-            f"User request: {prompt}\n"
-            f"Function to call: "
-        )
-
-        input_tensor = self._model.encode(meta_prompt)
-        input_ids: list[int] = input_tensor[0].tolist()
-
-        # Step 1: Logit-constrained selection of function name
-        chosen_func_name = self._sample_constrained(
-            input_ids=input_ids,
-            valid_candidates=func_names,
-            max_tokens=15,
-        )
-
-        if chosen_func_name not in func_names:
-            for name in func_names:
-                if name.startswith(chosen_func_name):
-                    chosen_func_name = name
-                    break
-            else:
-                chosen_func_name = func_names[0]
-
-        selected_func = next(
-            f for f in functions if f.name == chosen_func_name
-        )
-
-        # Step 2: Extract parameter values matching schema types
-        extracted_params: dict[str, Any] = {}
-        for param_name, param_prop in selected_func.parameters.items():
-            if param_prop.type == "number":
-                extracted_params[param_name] = self._extract_number(
-                    prompt, param_name
-                )
-            elif param_prop.type == "string":
-                extracted_params[param_name] = self._extract_string(
-                    prompt, param_name
-                )
-            elif param_prop.type == "boolean":
-                extracted_params[param_name] = "true" in prompt.lower()
-            else:
-                extracted_params[param_name] = self._extract_string(
-                    prompt, param_name
-                )
+        func = next(f for f in functions if f.name == name)
+        params = self._extract_parameters(prompt, func)
 
         return FunctionCallResult(
-            prompt=prompt,
-            name=chosen_func_name,
-            parameters=extracted_params,
+            prompt=prompt, name=name, parameters=params,
         )
